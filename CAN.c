@@ -37,11 +37,33 @@ void CAN_init(){
  * Initiates a CAN transfer
  */
 void CAN_transmit(){
+    //set WRNRD (write, not read)
+    *((volatile uint32_t *) (0x40040024)) |= 0x80;
+    //set mask, arb,control, DATA A
+    *((volatile uint32_t *) (0x40040024)) |= 0x72;
+
+    //configure mask
+    *((volatile uint32_t *) (0x4004002C)) &= 0xE000;
+
+    //set 11 bit identifier (ARB)
+    *((volatile uint32_t *) (0x40040034)) |= 0xA028;
+    //configure message control (set EOB and DLC(#4))
+    *((volatile uint32_t *) (0x40040038)) |= 0x84;
+    //configure data
+    *((volatile uint32_t *) (0x4004003C)) |= 0xABAB;
+    *((volatile uint32_t *) (0x40040040)) |= 0xFDFD;
+
+    //transmit data in interface 1 to message object
+    *((volatile uint32_t *) (0x40040024)) |= 0x4;
+    //write to MNUM to initiate transfer
+    *((volatile uint32_t *) (0x40040020)) |= 0x1;
+
 
 }
 
 /*
  * Configures a transmit message object for incoming remote frame
+ * Prepares data for incoming remote frame
  *
  * a different CAN device on the network may request the data here
  * with a remote frame
@@ -51,9 +73,13 @@ void CAN_response(){
 }
 
 /*
- * Initializes a remote frame transfer
+ * Initializes a remote frame transfer. Request particular data
+ * using a CAN remote frame
+ *
  *
  * -configures receive message object for desired data
  * -sends remote frame requesting desired data
  */
-void CAN_request
+void CAN_request(){
+
+}
