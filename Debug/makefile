@@ -8,6 +8,7 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./CAN.obj" \
 "./lib_c.obj" \
 "./main.obj" \
 "./tm4c123gh6pm_startup_ccs.obj" \
@@ -141,8 +142,8 @@ Library_in_C.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 # Other Targets
 clean:
 	-$(RM) $(EXE_OUTPUTS__QUOTED)
-	-$(RM) "lib_c.obj" "main.obj" "tm4c123gh6pm_startup_ccs.obj" 
-	-$(RM) "lib_c.d" "main.d" "tm4c123gh6pm_startup_ccs.d" 
+	-$(RM) "CAN.obj" "lib_c.obj" "main.obj" "tm4c123gh6pm_startup_ccs.obj" 
+	-$(RM) "CAN.d" "lib_c.d" "main.d" "tm4c123gh6pm_startup_ccs.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 

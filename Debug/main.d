@@ -11,6 +11,8 @@ main.obj: /home/romanswi/ti/ccs1281/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/inc
 main.obj: /home/romanswi/ti/ccs1281/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/machine/_types.h
 main.obj: /home/romanswi/ti/ccs1281/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/machine/_stdint.h
 main.obj: /home/romanswi/ti/ccs1281/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/sys/_stdint.h
+main.obj: ../CAN.h
+main.obj: ../lib_c.h
 
 ../main.c:
 
@@ -33,4 +35,8 @@ main.obj: /home/romanswi/ti/ccs1281/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/inc
 /home/romanswi/ti/ccs1281/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/machine/_stdint.h:
 
 /home/romanswi/ti/ccs1281/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/include/sys/_stdint.h:
+
+../CAN.h:
+
+../lib_c.h:
 

@@ -1,3 +1,4 @@
+"./CAN.obj"
 "./lib_c.obj"
 "./main.obj"
 "./tm4c123gh6pm_startup_ccs.obj"

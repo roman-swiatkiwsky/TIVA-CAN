@@ -1,14 +1,6 @@
 #include <stdint.h>
 #include "CAN.h"
-extern uint8_t read_character();
-extern void output_character(uint8_t);
-extern void read_string(char[]);
-extern void output_string(char[]);
-extern void uart_interrupt_init();
-extern void UART_HANDLER_EXIT();
-extern void echo();
-
-void init_uart();
+#include "lib_c.h"
 void transmitter();
 void reciever();
 
