@@ -9,3 +9,4 @@ uint32_t CAN_check_message();
 void CAN_response();
 void CAN_request();
 void CAN_SET_RATE();
+void CAN_join_network();

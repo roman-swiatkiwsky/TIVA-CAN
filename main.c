@@ -8,7 +8,7 @@ int main(void)
 {
     init_uart();
     uart_interrupt_init();
-    transmitter();
+    reciever();
 
 
 
@@ -27,6 +27,7 @@ int main(void)
 void transmitter (){
     CAN_init();
     CAN_transmit();
+    CAN_join_network();
 }
 
 /*
@@ -35,10 +36,12 @@ void transmitter (){
 void reciever(){
     CAN_init();
     CAN_read_init();
+    CAN_join_network();
     while (1) {
         uint32_t result = CAN_check_message();
         if (result != 0){
             output_string("I may have received a message; check register!");
+            CAN_read();
         }
     }
 }
