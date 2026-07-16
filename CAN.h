@@ -8,4 +8,4 @@ void CAN_read();
 uint32_t CAN_check_message();
 void CAN_response();
 void CAN_request();
-
+void CAN_SET_RATE();

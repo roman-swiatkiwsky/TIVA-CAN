@@ -1,17 +1,17 @@
 ******************************************************************************
                   TI ARM Linker Unix v20.2.7                   
 ******************************************************************************
->> Linked Tue Jul 14 13:57:16 2026
+>> Linked Wed Jul 15 20:14:49 2026
 
 OUTPUT FILE NAME:   <Library_in_C.out>
-ENTRY POINT SYMBOL: "_c_int00_noinit_noargs"  address: 00000581
+ENTRY POINT SYMBOL: "_c_int00_noinit_noargs"  address: 000005cd
 
 
 MEMORY CONFIGURATION
 
          name            origin    length      used     unused   attr    fill
 ----------------------  --------  ---------  --------  --------  ----  --------
-  FLASH                 00000000   00040000  000005c0  0003fa40  R  X
+  FLASH                 00000000   00040000  0000060c  0003f9f4  R  X
   SRAM                  20000000   00008000  00000200  00007e00  RW X
 
 
@@ -19,9 +19,9 @@ SEGMENT ALLOCATION MAP
 
 run origin  load origin   length   init length attrs members
 ----------  ----------- ---------- ----------- ----- -------
-00000000    00000000    000005c0   000005c0    r-x
+00000000    00000000    0000060c   0000060c    r-x
   00000000    00000000    0000026c   0000026c    r-- .intvecs
-  0000026c    0000026c    00000354   00000354    r-x .text
+  0000026c    0000026c    000003a0   000003a0    r-x .text
 20000000    20000000    00000200   00000000    rw-
   20000000    20000000    00000200   00000000    rw- .stack
 
@@ -34,14 +34,14 @@ section   page    origin      length       input sections
 .intvecs   0    00000000    0000026c     
                   00000000    0000026c     tm4c123gh6pm_startup_ccs.obj (.intvecs)
 
-.text      0    0000026c    00000354     
-                  0000026c    00000170     CAN.obj (.text)
-                  000003dc    00000168     lib_c.obj (.text)
-                  00000544    0000003c     main.obj (.text)
-                  00000580    0000002c     rtsv7M4_T_le_v4SPD16_eabi.lib : boot_cortex_m.c.obj (.text:_c_int00_noinit_noargs:_c_int00_noinit_noargs)
-                  000005ac    0000000c     tm4c123gh6pm_startup_ccs.obj (.text)
-                  000005b8    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : pre_init.c.obj (.text:_system_pre_init)
-                  000005bc    00000004                                   : exit.c.obj (.text:abort:abort)
+.text      0    0000026c    000003a0     
+                  0000026c    000001a4     CAN.obj (.text)
+                  00000410    0000013c     lib_c.obj (.text)
+                  0000054c    00000080     main.obj (.text)
+                  000005cc    0000002c     rtsv7M4_T_le_v4SPD16_eabi.lib : boot_cortex_m.c.obj (.text:_c_int00_noinit_noargs:_c_int00_noinit_noargs)
+                  000005f8    0000000c     tm4c123gh6pm_startup_ccs.obj (.text)
+                  00000604    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : pre_init.c.obj (.text:_system_pre_init)
+                  00000608    00000004                                   : exit.c.obj (.text:abort:abort)
 
 .cinit     0    00000000    00000000     UNINITIALIZED
 
@@ -61,11 +61,11 @@ MODULE SUMMARY
        ------                         ----   -------   -------
     ./
        tm4c123gh6pm_startup_ccs.obj   12     620       0      
-       CAN.obj                        368    0         0      
-       lib_c.obj                      360    0         0      
-       main.obj                       60     0         0      
+       CAN.obj                        420    0         0      
+       lib_c.obj                      316    0         0      
+       main.obj                       128    0         0      
     +--+------------------------------+------+---------+---------+
-       Total:                         800    620       0      
+       Total:                         876    620       0      
                                                               
     /home/romanswi/ti/ccs1281/ccs/tools/compiler/ti-cgt-arm_20.2.7.LTS/lib/rtsv7M4_T_le_v4SPD16_eabi.lib
        boot_cortex_m.c.obj            44     0         0      
@@ -76,23 +76,23 @@ MODULE SUMMARY
                                                               
        Stack:                         0      0         512    
     +--+------------------------------+------+---------+---------+
-       Grand Total:                   852    620       512    
+       Grand Total:                   928    620       512    
 
 
 GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
 
 address   name                   
 -------   ----                   
-000005bd  C$$EXIT                
-000004e1  CAN_SET_RATE           
-00000381  CAN_check_message      
+00000609  C$$EXIT                
+00000397  CAN_SET_RATE           
+0000038d  CAN_check_message      
 0000026d  CAN_init               
-00000361  CAN_read               
-00000317  CAN_read_init          
-00000389  CAN_request            
-00000387  CAN_response           
-000002b5  CAN_transmit           
-000005ad  ResetISR               
+0000036d  CAN_read               
+00000323  CAN_read_init          
+00000395  CAN_request            
+00000393  CAN_response           
+000002c1  CAN_transmit           
+000005f9  ResetISR               
 20000200  __STACK_END            
 00000200  __STACK_SIZE           
 20000200  __STACK_TOP            
@@ -106,22 +106,22 @@ UNDEFED   __mpu_init
 20000000  __stack                
 20000000  __start___llvm_prf_cnts
 20000000  __stop___llvm_prf_cnts 
-00000581  _c_int00_noinit_noargs 
-000005b9  _system_pre_init       
-000005bd  abort                  
+000005cd  _c_int00_noinit_noargs 
+00000605  _system_pre_init       
+00000609  abort                  
 ffffffff  binit                  
-000004d5  echo                   
+00000509  echo                   
 00000000  g_pfnVectors           
-000003dd  init_uart              
-00000545  main                   
-00000443  output_character       
-00000497  output_string          
-0000042f  read_character         
-0000045f  read_string            
-0000055d  reciever               
-00000551  transmitter            
-00000569  uart_handler           
-000004bf  uart_interrupt_init    
+00000411  init_uart              
+0000054d  main                   
+00000477  output_character       
+000004cb  output_string          
+00000463  read_character         
+00000493  read_string            
+00000569  reciever               
+0000055d  transmitter            
+00000587  uart_handler           
+000004f3  uart_interrupt_init    
 
 
 GLOBAL SYMBOLS: SORTED BY Symbol Address 
@@ -132,29 +132,29 @@ address   name
 00000000  g_pfnVectors           
 00000200  __STACK_SIZE           
 0000026d  CAN_init               
-000002b5  CAN_transmit           
-00000317  CAN_read_init          
-00000361  CAN_read               
-00000381  CAN_check_message      
-00000387  CAN_response           
-00000389  CAN_request            
-000003dd  init_uart              
-0000042f  read_character         
-00000443  output_character       
-0000045f  read_string            
-00000497  output_string          
-000004bf  uart_interrupt_init    
-000004d5  echo                   
-000004e1  CAN_SET_RATE           
-00000545  main                   
-00000551  transmitter            
-0000055d  reciever               
-00000569  uart_handler           
-00000581  _c_int00_noinit_noargs 
-000005ad  ResetISR               
-000005b9  _system_pre_init       
-000005bd  C$$EXIT                
-000005bd  abort                  
+000002c1  CAN_transmit           
+00000323  CAN_read_init          
+0000036d  CAN_read               
+0000038d  CAN_check_message      
+00000393  CAN_response           
+00000395  CAN_request            
+00000397  CAN_SET_RATE           
+00000411  init_uart              
+00000463  read_character         
+00000477  output_character       
+00000493  read_string            
+000004cb  output_string          
+000004f3  uart_interrupt_init    
+00000509  echo                   
+0000054d  main                   
+0000055d  transmitter            
+00000569  reciever               
+00000587  uart_handler           
+000005cd  _c_int00_noinit_noargs 
+000005f9  ResetISR               
+00000605  _system_pre_init       
+00000609  C$$EXIT                
+00000609  abort                  
 20000000  __stack                
 20000000  __start___llvm_prf_cnts
 20000000  __stop___llvm_prf_cnts 
