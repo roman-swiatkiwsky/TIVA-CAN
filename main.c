@@ -1,18 +1,17 @@
 #include <stdint.h>
-extern uint8_t read_character();
-extern void output_character(uint8_t);
-extern void read_string(char[]);
-extern void output_string(char[]);
-extern void uart_interrupt_init();
-extern void UART_HANDLER_EXIT();
-extern void echo();
-
-void init_uart();
+#include "CAN.h"
+#include "lib_c.h"
+void transmitter();
+void reciever();
 
 int main(void)
 {
     init_uart();
     uart_interrupt_init();
+    transmitter();
+
+
+
     //infinite loop
     while (1) {
         //char b[20] = "Hello my Friend!";
@@ -21,6 +20,30 @@ int main(void)
     }
 
 }
+
+/*
+ * Routine ran by the transmitting CAN node
+ */
+void transmitter (){
+    CAN_init();
+    CAN_transmit();
+}
+
+/*
+ * Routine ran by the recieving CAN node
+ */
+void reciever(){
+    CAN_init();
+    CAN_read_init();
+    while (1) {
+        uint32_t result = CAN_check_message();
+        if (result != 0){
+            output_string("I may have received a message; check register!");
+        }
+    }
+}
+
+
 
 
 /*

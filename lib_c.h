@@ -1,0 +1,9 @@
+#include <stdint.h>
+void init_uart();
+uint8_t read_character();
+void output_character(uint8_t);
+void read_string(char[]);
+void output_string(char[]);
+void uart_interrupt_init();
+void UART_HANDLER_EXIT();
+void echo();

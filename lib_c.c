@@ -102,20 +102,6 @@ void echo(){
     output_character(*((volatile uint8_t *) (0x4000C000)));
     return;
 }
-/*
-Hard coded for specific CAN bit timing
-CAN module must be ready for configuration when this routine is called
-*/
-void CAN_SET_RATE(){
-    //set BRP to 1
-    *((volatile uint32_t *) (0x4004000C)) = 0x00000001;
-    //set SJW to 3
-    *((volatile uint32_t *) (0x4004000C)) |= 0x000000C0;
-    //set TSEG1 to 12
-    *((volatile uint32_t *) (0x4004000C)) |= 0x00000C00;
-    //set TSEG2 to 2
-    *((volatile uint32_t *) (0x4004000C)) |= 0x00002000;
-}
 
 
 
