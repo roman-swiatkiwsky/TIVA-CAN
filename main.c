@@ -8,7 +8,7 @@ int main(void)
 {
     init_uart();
     uart_interrupt_init();
-    reciever();
+    transmitter();
 
 
 

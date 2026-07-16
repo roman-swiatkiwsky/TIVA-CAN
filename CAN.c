@@ -32,6 +32,9 @@ void CAN_init(){
      */
     *((volatile uint32_t *) (0x40040000)) |= 1;
 
+    //leave INIT state
+    *((volatile uint32_t *) (0x40040000)) &= 0xFFFFE;
+
 }
 
 /*
@@ -61,8 +64,6 @@ void CAN_transmit(){
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) |= 0x1;
 
-    //leave INIT state
-    *((volatile uint32_t *) (0x40040000)) &= 0xFFFFE;
 }
 
 
@@ -86,8 +87,6 @@ void CAN_read_init(){
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040080)) = 0x2;
 
-    //leave INIT state
-    *((volatile uint32_t *) (0x40040000)) &= 0xFFFFE;
 }
 
 /*
