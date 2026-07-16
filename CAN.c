@@ -23,18 +23,15 @@ void CAN_init(){
     //enable digital for both
     *((volatile uint32_t *) (0x4000551C)) |= 0x30;
     //enable alt func for both
-    *((volatile uint32_t *) (0x400FE420)) |= 0x30;
+    *((volatile uint32_t *) (0x40005420)) |= 0x30;
     //select CAN RX TX for corresponding pins
-    *((volatile uint32_t *) (0x400FE52C)) |= 0x880000;
+    *((volatile uint32_t *) (0x4000552C)) |= 0x880000;
 
     /*
      * CAN into INIT and/or test mode
      */
     *((volatile uint32_t *) (0x40040000)) |= 1;
 
-
-    //leave INIT state
-    *((volatile uint32_t *) (0x40040000)) &= 0xFFFFE;
 }
 
 /*
@@ -43,16 +40,15 @@ void CAN_init(){
  * -uses IF1
  */
 void CAN_transmit(){
-    //set WRNRD (write, not read)
-    *((volatile uint32_t *) (0x40040024)) |= 0x80;
-    //set mask, arb,control, DATA A
-    *((volatile uint32_t *) (0x40040024)) |= 0x72;
-
-    //configure mask
-    *((volatile uint32_t *) (0x4004002C)) &= 0xE000;
+    //set WRNRD (write, not read), mask, arb,control, DATA A
+    *((volatile uint32_t *) (0x40040024)) |= 0xF2;
 
     //set 11 bit identifier (ARB)
-    *((volatile uint32_t *) (0x40040034)) |= 0xA028;
+    *((volatile uint32_t *) (0x40040034)) |= 0x2028;
+
+    //validate message object
+    *((volatile uint32_t *) (0x40040034)) |= 0x8000;
+
     //configure message control (set EOB and DLC(#4))
     *((volatile uint32_t *) (0x40040038)) |= 0x84;
     //configure data
@@ -60,9 +56,13 @@ void CAN_transmit(){
     *((volatile uint32_t *) (0x40040040)) |= 0xFDFD;
 
     //transmit data in interface 1 to message object
-    *((volatile uint32_t *) (0x40040024)) |= 0x4;
+    *((volatile uint32_t *) (0x40040038)) |= 0x100;
+
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) |= 0x1;
+
+    //leave INIT state
+    *((volatile uint32_t *) (0x40040000)) &= 0xFFFFE;
 }
 
 
@@ -71,23 +71,23 @@ void CAN_transmit(){
  * -Uses IF2
  */
 void CAN_read_init(){
-    //set WRNRD (write, not read)
-    *((volatile uint32_t *) (0x40040084)) |= 0x80;
-    //set mask, arb,control, DATA A
-    *((volatile uint32_t *) (0x40040084)) |= 0x70;
-
-    //configure mask
-    *((volatile uint32_t *) (0x4004008C)) &= 0xE000;
+    //set WRNRD (write, not read), mask, arb, control
+    *((volatile uint32_t *) (0x40040084)) |= 0xF0;
 
     //set 11 bit identifier (ARB) and direction
-    *((volatile uint32_t *) (0x40040094)) |= 0x8028;
+    *((volatile uint32_t *) (0x40040094)) |= 0x28;
+
+    //validate message object
+    *((volatile uint32_t *) (0x40040094)) |= 0x8000;
+
     //configure message control (set EOB and DLC(#4))
     *((volatile uint32_t *) (0x40040098)) |= 0x84;
 
-    //transmit data in interface 2 to message object
-    *((volatile uint32_t *) (0x40040084)) |= 0x4;
     //write to MNUM to initiate transfer
-    *((volatile uint32_t *) (0x40040080)) |= 0x1;
+    *((volatile uint32_t *) (0x40040080)) = 0x2;
+
+    //leave INIT state
+    *((volatile uint32_t *) (0x40040000)) &= 0xFFFFE;
 }
 
 /*
