@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <sys/types.h>
 #include "CAN.h"
 #include "lib_c.h"
 void transmitter();
@@ -6,16 +7,14 @@ void reciever();
 
 int main(void)
 {
+    int i=0;
+    transmitter();
     init_uart();
     uart_interrupt_init();
-    reciever();
-
 
 
     //infinite loop
     while (1) {
-        //char b[20] = "Hello my Friend!";
-        //output_string(b);
 
     }
 
@@ -26,8 +25,9 @@ int main(void)
  */
 void transmitter (){
     CAN_init();
-    CAN_transmit();
     CAN_join_network();
+    CAN_transmit_init();
+
 }
 
 /*
@@ -70,8 +70,8 @@ void uart_handler_transmitter(){
 
     //send char over CAN
     uint8_t in = *((volatile uint8_t*)(0x4000C000));
-
     CAN_new_data((uint32_t)in);
+
 
     return;
 }

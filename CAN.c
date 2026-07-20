@@ -42,28 +42,20 @@ void CAN_join_network(){
 }
 
 /*
- * Configures a message object and initiates
- * it immediatley for a CAN transfer
- * -uses IF1
+ * Configures a message object
  */
-void CAN_transmit(){
+void CAN_transmit_init(){
     //set WRNRD (write, not read), mask, arb,control, DATA A
-    *((volatile uint32_t *) (0x40040024)) |= 0xF2;
+    *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB)
-    *((volatile uint32_t *) (0x40040034)) |= 0x2028;
+    *((volatile uint32_t *) (0x40040034)) |= 0x20F0;
 
     //validate message object
     *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
     //configure message control (set EOB and DLC(#4))
     *((volatile uint32_t *) (0x40040038)) |= 0x84;
-    //configure data
-    *((volatile uint32_t *) (0x4004003C)) = 0x0041;
-    *((volatile uint32_t *) (0x40040040)) = 0x0000;
-
-    //transmit data in interface 1 to message object
-    *((volatile uint32_t *) (0x40040038)) |= 0x100;
 
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) |= 0x1;
@@ -79,7 +71,7 @@ void CAN_transmit(){
  */
 void CAN_new_data(uint32_t dat){
     //set wrnrd and dat
-    *((volatile uint32_t *) (0x40040024)) = 0x86;
+    *((volatile uint32_t *) (0x40040024)) |= 0x86;
 
     //update data
     *((volatile uint32_t *) (0x4004003C)) = dat&0xFFFF;
@@ -102,13 +94,17 @@ void CAN_read_init(){
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB) and direction
-    *((volatile uint32_t *) (0x40040034)) |= 0x28;
+    *((volatile uint32_t *) (0x40040034)) |= 0xF0;
+
+    //id masking
+    *((volatile uint32_t *) (0x4004002C)) = 0x00001FFC;
+
 
     //validate message object
     *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
     //configure message control (set EOB and DLC(#4))
-    *((volatile uint32_t *) (0x40040038)) |= 0x84;
+    *((volatile uint32_t *) (0x40040038)) |= 0x1084;
 
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) = 0x2;
