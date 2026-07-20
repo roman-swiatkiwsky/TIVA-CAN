@@ -10,3 +10,6 @@ makefile
 *.opt
 readme.txt
 *.ccxml
+.project
+.cproject
+.ccsproject

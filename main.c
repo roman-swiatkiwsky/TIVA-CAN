@@ -40,8 +40,11 @@ void reciever(){
     while (1) {
         uint32_t result = CAN_check_message();
         if (result != 0){
-            output_string("I may have received a message; check register!");
-            CAN_read();
+            output_string("I received: ");
+            result = CAN_read();
+            output_character(result);
+            output_string("\n\r");
+
         }
     }
 }
@@ -50,14 +53,26 @@ void reciever(){
 
 
 /*
+ * This source is currently shared by CAN transmitter and receiver
+ * Take notice which it is currently written for
+ *
+ * Probably best to come up with a solution for both
+ *
+ *
  * THIS MUST READ THE NEW DATA TO CLEAR THE INTERRUPT
  *AS MENTIONED ON PAGE 928 UNDER RXRIS
  * AS FIFO IS NOT ENABLED!!!!!
  */
-void uart_handler(){
+void uart_handler_transmitter(){
     //clear interrupt
     *((volatile uint32_t *) (0x4000C044)) |= 0x10;
     echo();
+
+    //send char over CAN
+    uint8_t in = *((volatile uint8_t*)(0x4000C000));
+
+    CAN_new_data((uint32_t)in);
+
     return;
 }
 

@@ -59,15 +59,37 @@ void CAN_transmit(){
     //configure message control (set EOB and DLC(#4))
     *((volatile uint32_t *) (0x40040038)) |= 0x84;
     //configure data
-    *((volatile uint32_t *) (0x4004003C)) |= 0x1414;
-    *((volatile uint32_t *) (0x40040040)) |= 0xC9C9;
+    *((volatile uint32_t *) (0x4004003C)) = 0x0041;
+    *((volatile uint32_t *) (0x40040040)) = 0x0000;
 
     //transmit data in interface 1 to message object
     *((volatile uint32_t *) (0x40040038)) |= 0x100;
 
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) |= 0x1;
+}
 
+/*
+ * This updates a transmit message object with new data
+ *
+ * This is how you send new data once the transmit message object is configured with
+ * CAN_transmit
+ *
+ * Takes data as 32 bit number to be sent
+ */
+void CAN_new_data(uint32_t dat){
+    //set wrnrd and dat
+    *((volatile uint32_t *) (0x40040024)) = 0x86;
+
+    //update data
+    *((volatile uint32_t *) (0x4004003C)) = dat&0xFFFF;
+    *((volatile uint32_t *) (0x40040040)) = (dat>>16)&0xFFFF;
+
+    //set newdat and txrqst
+    *((volatile uint32_t *) (0x40040038)) |= 0x8100;
+
+    //write mnum
+    *((volatile uint32_t *) (0x40040020)) = 0x1;
 }
 
 
@@ -98,9 +120,9 @@ void CAN_read_init(){
  * -Requests data from message object with new data
  * into IF2
  */
-void CAN_read(){
+uint32_t CAN_read(){
     //indicate reading DATA A and DATA B from Message object
-    *((volatile uint32_t *) (0x40040084)) |= 0x12;
+    *((volatile uint32_t *) (0x40040084)) = 0x12;
     //write MNUM to CRQ
     *((volatile uint32_t *) (0x40040080)) = 0x2;
 
@@ -113,9 +135,15 @@ void CAN_read(){
     //write MNUM to CRQ
     *((volatile uint32_t *) (0x40040080)) = 0x2;
 
-
     //AT THIS POINT, DATA SHOULD BE
     //SOMEWHERE IN IF2 DATA REG
+
+    uint32_t dat = 0;
+
+    dat |= *((volatile uint32_t*)(0x400400A0));
+    dat <<= 16;
+    dat |= *((volatile uint32_t*)(0x4004009C));
+    return dat;
 }
 
 /*
