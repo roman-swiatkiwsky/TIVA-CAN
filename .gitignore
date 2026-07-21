@@ -1,2 +1,15 @@
 *.prefs
 *.launch
+*.obj
+*.d
+*.mk
+makefile
+*.xml
+*.out
+*.map
+*.opt
+readme.txt
+*.ccxml
+.project
+.cproject
+.ccsproject

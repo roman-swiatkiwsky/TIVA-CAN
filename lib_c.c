@@ -4,13 +4,24 @@
 /*
  * This is just a quick example of initialization written in C instead of assembly
  *
- * Take note of the syntax, with especial note to the '|='
  */
 void init_uart(){
-    //UART module run mode
-    *((volatile uint32_t *) (0x400FE618)) = 0x1;
+
     //GPIO module run mode
     *((volatile uint32_t *) (0x400FE608)) = 0x1;
+    //UART module run mode
+    *((volatile uint32_t *) (0x400FE618)) = 0x1;
+
+
+    //GPIO port A pins 0 and 1 dig enable
+    *((volatile uint32_t *) (0x4000451C)) |= 0x3;
+    //select ALT FUNC for pins 0 and 1 port A
+    *((volatile uint32_t *) (0x40004420)) |= 0x3;
+    //select alt func as uart RX and TX
+    *((volatile uint32_t *) (0x4000452C)) |= 0x11;
+    //pull up resistor for pin A0
+    *((volatile uint32_t *) (0x40004510)) |= 0x1;
+
     //turn off UART control for config
     *((volatile uint32_t *) (0x4000C030)) = 0x0;
     //set int baud rate divisor
@@ -25,13 +36,7 @@ void init_uart(){
     //enables RX, TX, and UART itself
     *((volatile uint32_t *) (0x4000C030)) = 0x301;
 
-    //GPIO port A pins 0 and 1 dig enable
-    //(Cool syntax for ORR operation!)
-    *((volatile uint32_t *) (0x4000451C)) |= 0x3;
-    //select ALT FUNC for pins 0 and 1 port A
-    *((volatile uint32_t *) (0x40004420)) |= 0x3;
-    //select alt func as uart RX and TX
-    *((volatile uint32_t *) (0x4000452C)) |= 0x11;
+
     return;
 }
 
