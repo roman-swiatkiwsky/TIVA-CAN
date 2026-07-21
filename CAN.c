@@ -45,7 +45,7 @@ void CAN_join_network(){
  * Configures a message object
  */
 void CAN_transmit_init(){
-    //set WRNRD (write, not read), mask, arb,control, DATA A
+    //set WRNRD (write, not read), mask, arb,control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB)
@@ -69,7 +69,7 @@ void CAN_transmit_init(){
  *
  * Takes data as 32 bit number to be sent
  */
-void CAN_new_data(uint32_t dat){
+void CAN_send_data(uint32_t dat){
     //set wrnrd and dat
     *((volatile uint32_t *) (0x40040024)) |= 0x86;
 
@@ -160,8 +160,21 @@ uint32_t CAN_check_message(){
  * a different CAN device on the network may request the data here
  * with a remote frame
  */
-void CAN_response(){
+void CAN_source_init(){
+    //set WRNRD (write, not read), mask, arb,control, DATA A
+    *((volatile uint32_t *) (0x40040024)) |= 0xF2;
 
+    //set 11 bit identifier (ARB)
+    *((volatile uint32_t *) (0x40040034)) |= 0x20F8;
+
+    //validate message object
+    *((volatile uint32_t *) (0x40040034)) |= 0x8000;
+
+    //configure message control (set EOB and DLC(#4) and RMTEN)
+    *((volatile uint32_t *) (0x40040038)) |= 0x284;
+
+    //write to MNUM to initiate transfer
+    *((volatile uint32_t *) (0x40040020)) = 0x6;
 }
 
 /*
@@ -172,9 +185,35 @@ void CAN_response(){
  * -configures receive message object for desired data
  * -sends remote frame requesting desired data
  */
-void CAN_request(){
+void CAN_remote_init(){
+    //set WRNRD, arb,control,
+    *((volatile uint32_t *) (0x40040024)) = 0xB0;
 
+    //set ID and direction
+    *((volatile uint32_t *) (0x40040034)) = 0x80F8;
+
+    //configure message control (set EOB and DLC(#4))
+    *((volatile uint32_t *) (0x40040038)) = 0x84;
+
+    //write to MNUM to initiate transfer
+    *((volatile uint32_t *) (0x40040020)) = 0x6;
 }
+
+
+/*
+ * Sends a remote frame after it has been configured
+ *
+ * remote init must be called before this
+ */
+void CAN_remote_send(){
+    //set WRNRD, txqst
+    *((volatile uint32_t *) (0x40040024)) = 0x84;
+
+    //write to MNUM to initiate transfer
+    *((volatile uint32_t *) (0x40040020)) = 0x6;
+}
+
+
 
 /*
  * Hard coded for specific CAN bit timing
