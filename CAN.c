@@ -86,13 +86,13 @@ void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
  */
 void CAN_send_data(uint8_t DAT[8],uint8_t MNUM){
     //set wrnrd and dat
-    *((volatile uint32_t *) (0x40040024)) |= 0x86;
+    *((volatile uint32_t *) (0x40040024)) |= 0x87;
 
     //update data
     *((volatile uint32_t *) (0x4004003C)) = *((uint16_t*)DAT);
-    *((volatile uint32_t *) (0x40040040)) = *((uint16_t*)DAT+2);
-    *((volatile uint32_t *) (0x40040044)) = *((uint16_t*)DAT+4);
-    *((volatile uint32_t *) (0x40040048)) = *((uint16_t*)DAT+6);
+    *((volatile uint32_t *) (0x40040040)) = *((uint16_t*)(DAT+2));
+    *((volatile uint32_t *) (0x40040044)) = *((uint16_t*)(DAT+4));
+    *((volatile uint32_t *) (0x40040048)) = *((uint16_t*)(DAT+6));
 
     //set newdat and txrqst
     *((volatile uint32_t *) (0x40040038)) |= 0x8100;
@@ -139,7 +139,7 @@ void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM){
  */
 uint32_t CAN_read(uint8_t MNUM){
     //indicate reading DATA A and DATA B from Message object
-    *((volatile uint32_t *) (0x40040084)) = 0x12;
+    *((volatile uint32_t *) (0x40040084)) = 0x13;
     //write MNUM to CRQ
     *((volatile uint32_t *) (0x40040080)) = 0x2;
 

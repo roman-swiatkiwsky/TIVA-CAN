@@ -24,7 +24,9 @@ int main(void)
 void transmitter (){
     CAN_init();
     CAN_join_network();
-    CAN_transmit_init(0xF,0x4,0x1);
+    CAN_transmit_init(0xF,0x8,0x1);
+    //uint8_t dat[8] = {0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0};
+    //CAN_send_data(dat,0x1 );
 
 }
 
@@ -33,7 +35,7 @@ void transmitter (){
  */
 void reciever(){
     CAN_init();
-    CAN_read_init(0xF,0x4,0x2);
+    CAN_read_init(0xF,0x8,0x2);
     CAN_join_network();
     while (1) {
         uint32_t result = CAN_check_message();
