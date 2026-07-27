@@ -70,7 +70,7 @@ void uart_handler_transmitter(){
 
     //send char over CAN
     uint8_t in = *((volatile uint8_t*)(0x4000C000));
-    CAN_send_data((uint32_t)in);
+    CAN_send_data((uint32_t)in,0x1);
 
 
     return;

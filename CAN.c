@@ -81,7 +81,7 @@ void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
  *
  * Takes data as 32 bit number to be sent
  */
-void CAN_send_data(uint32_t dat){
+void CAN_send_data(uint32_t dat,uint8_t MNUM){
     //set wrnrd and dat
     *((volatile uint32_t *) (0x40040024)) |= 0x86;
 
@@ -93,13 +93,14 @@ void CAN_send_data(uint32_t dat){
     *((volatile uint32_t *) (0x40040038)) |= 0x8100;
 
     //write mnum
-    *((volatile uint32_t *) (0x40040020)) = 0x1;
+    *((volatile uint32_t *) (0x40040020)) = MNUM;
 }
 
 
 /*
  * Initializes a CAN object to be read from
- * -Uses IF1
+ *
+ *
  */
 void CAN_read_init(){
     //set WRNRD (write, not read), mask, arb, control
