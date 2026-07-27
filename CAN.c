@@ -57,6 +57,7 @@ void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
     ID <<= 2;
     *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
     *((volatile uint32_t *) (0x40040034)) |= ID;
+    *((volatile uint32_t *) (0x40040034)) |= 0x2000;
 
 
     //validate message object
@@ -80,6 +81,8 @@ void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
  * CAN_transmit
  *
  * Takes data as 32 bit number to be sent
+ *
+ * MNUM must match that of a configured transmit object
  */
 void CAN_send_data(uint32_t dat,uint8_t MNUM){
     //set wrnrd and dat
@@ -102,25 +105,28 @@ void CAN_send_data(uint32_t dat,uint8_t MNUM){
  *
  *
  */
-void CAN_read_init(){
+void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM){
     //set WRNRD (write, not read), mask, arb, control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB) and direction
-    *((volatile uint32_t *) (0x40040034)) |= 0xF0;
+    ID <<= 2;
+    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+    *((volatile uint32_t *) (0x40040034)) |= ID;
 
     //id masking
     *((volatile uint32_t *) (0x4004002C)) = 0x00001FFC;
-
 
     //validate message object
     *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
     //configure message control (set EOB and DLC(#4))
-    *((volatile uint32_t *) (0x40040038)) |= 0x1084;
+    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
+    *((volatile uint32_t *) (0x40040038)) |= 0x1080;
+    *((volatile uint32_t *) (0x40040038)) |= DLC;
 
     //write to MNUM to initiate transfer
-    *((volatile uint32_t *) (0x40040020)) = 0x2;
+    *((volatile uint32_t *) (0x40040020)) = MNUM;
 
 }
 
@@ -129,7 +135,7 @@ void CAN_read_init(){
  * -Requests data from message object with new data
  * into IF2
  */
-uint32_t CAN_read(){
+uint32_t CAN_read(uint8_t MNUM){
     //indicate reading DATA A and DATA B from Message object
     *((volatile uint32_t *) (0x40040084)) = 0x12;
     //write MNUM to CRQ
@@ -142,7 +148,7 @@ uint32_t CAN_read(){
     *((volatile uint32_t *) (0x40040084)) |= 0x80;
 
     //write MNUM to CRQ
-    *((volatile uint32_t *) (0x40040080)) = 0x2;
+    *((volatile uint32_t *) (0x40040080)) = MNUM;
 
     //AT THIS POINT, DATA SHOULD BE
     //SOMEWHERE IN IF2 DATA REG

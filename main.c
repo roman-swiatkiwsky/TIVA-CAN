@@ -7,11 +7,9 @@ void reciever();
 
 int main(void)
 {
-
-    transmitter();
     init_uart();
     uart_interrupt_init();
-
+    reciever();
 
     //infinite loop
     while (1) {
@@ -26,7 +24,7 @@ int main(void)
 void transmitter (){
     CAN_init();
     CAN_join_network();
-    CAN_transmit_init(0x83C,0x4,0x1);
+    CAN_transmit_init(0xF,0x4,0x1);
 
 }
 
@@ -35,13 +33,13 @@ void transmitter (){
  */
 void reciever(){
     CAN_init();
-    CAN_read_init();
+    CAN_read_init(0xF,0x4,0x2);
     CAN_join_network();
     while (1) {
         uint32_t result = CAN_check_message();
         if (result != 0){
             output_string("I received: ");
-            result = CAN_read();
+            result = CAN_read(0x2);
             output_character(result);
             output_string("\n\r");
 
