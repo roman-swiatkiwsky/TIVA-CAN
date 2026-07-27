@@ -42,23 +42,36 @@ void CAN_join_network(){
 }
 
 /*
- * Configures a message object
+ * Configures a transmit message object
+ *
+ * Can configure:
+ * - ID
+ * - DLC (payload size, 0 to 8 bytes)
+ * - Message object number
  */
-void CAN_transmit_init(){
-    //set WRNRD (write, not read), mask, arb,control, DATA A
+void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
+    //set WRNRD (write, not read), mask, arb,control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB)
-    *((volatile uint32_t *) (0x40040034)) |= 0x20F0;
+    ID <<= 2;
+    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+    *((volatile uint32_t *) (0x40040034)) |= ID;
+    *((volatile uint32_t *) (0x40040034)) |= 0x2000;
+
 
     //validate message object
     *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
     //configure message control (set EOB and DLC(#4))
-    *((volatile uint32_t *) (0x40040038)) |= 0x84;
+    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
+    *((volatile uint32_t *) (0x40040038)) |= DLC;
+    *((volatile uint32_t *) (0x40040038)) |= 0x80;
+
+
 
     //write to MNUM to initiate transfer
-    *((volatile uint32_t *) (0x40040020)) |= 0x1;
+    *((volatile uint8_t *) (0x40040020)) = MNUM;
 }
 
 /*
@@ -67,47 +80,55 @@ void CAN_transmit_init(){
  * This is how you send new data once the transmit message object is configured with
  * CAN_transmit
  *
- * Takes data as 32 bit number to be sent
+ * Takes a pointer to an array of 8 bytes
+ *
+ * MNUM must match that of a configured transmit object
  */
-void CAN_new_data(uint32_t dat){
+void CAN_send_data(uint8_t DAT[8],uint8_t MNUM){
     //set wrnrd and dat
-    *((volatile uint32_t *) (0x40040024)) |= 0x86;
+    *((volatile uint32_t *) (0x40040024)) |= 0x87;
 
     //update data
-    *((volatile uint32_t *) (0x4004003C)) = dat&0xFFFF;
-    *((volatile uint32_t *) (0x40040040)) = (dat>>16)&0xFFFF;
+    *((volatile uint32_t *) (0x4004003C)) = *((uint16_t*)DAT);
+    *((volatile uint32_t *) (0x40040040)) = *((uint16_t*)(DAT+2));
+    *((volatile uint32_t *) (0x40040044)) = *((uint16_t*)(DAT+4));
+    *((volatile uint32_t *) (0x40040048)) = *((uint16_t*)(DAT+6));
 
     //set newdat and txrqst
     *((volatile uint32_t *) (0x40040038)) |= 0x8100;
 
     //write mnum
-    *((volatile uint32_t *) (0x40040020)) = 0x1;
+    *((volatile uint32_t *) (0x40040020)) = MNUM;
 }
 
 
 /*
  * Initializes a CAN object to be read from
- * -Uses IF1
+ *
+ *
  */
-void CAN_read_init(){
+void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM){
     //set WRNRD (write, not read), mask, arb, control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB) and direction
-    *((volatile uint32_t *) (0x40040034)) |= 0xF0;
+    ID <<= 2;
+    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+    *((volatile uint32_t *) (0x40040034)) |= ID;
 
     //id masking
     *((volatile uint32_t *) (0x4004002C)) = 0x00001FFC;
-
 
     //validate message object
     *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
     //configure message control (set EOB and DLC(#4))
-    *((volatile uint32_t *) (0x40040038)) |= 0x1084;
+    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
+    *((volatile uint32_t *) (0x40040038)) |= 0x1080;
+    *((volatile uint32_t *) (0x40040038)) |= DLC;
 
     //write to MNUM to initiate transfer
-    *((volatile uint32_t *) (0x40040020)) = 0x2;
+    *((volatile uint32_t *) (0x40040020)) = MNUM;
 
 }
 
@@ -116,9 +137,9 @@ void CAN_read_init(){
  * -Requests data from message object with new data
  * into IF2
  */
-uint32_t CAN_read(){
+uint32_t CAN_read(uint8_t MNUM){
     //indicate reading DATA A and DATA B from Message object
-    *((volatile uint32_t *) (0x40040084)) = 0x12;
+    *((volatile uint32_t *) (0x40040084)) = 0x13;
     //write MNUM to CRQ
     *((volatile uint32_t *) (0x40040080)) = 0x2;
 
@@ -129,7 +150,7 @@ uint32_t CAN_read(){
     *((volatile uint32_t *) (0x40040084)) |= 0x80;
 
     //write MNUM to CRQ
-    *((volatile uint32_t *) (0x40040080)) = 0x2;
+    *((volatile uint32_t *) (0x40040080)) = MNUM;
 
     //AT THIS POINT, DATA SHOULD BE
     //SOMEWHERE IN IF2 DATA REG
@@ -160,8 +181,21 @@ uint32_t CAN_check_message(){
  * a different CAN device on the network may request the data here
  * with a remote frame
  */
-void CAN_response(){
+void CAN_source_init(){
+    //set WRNRD (write, not read), mask, arb,control, DATA A
+    *((volatile uint32_t *) (0x40040024)) |= 0xF2;
 
+    //set 11 bit identifier (ARB)
+    *((volatile uint32_t *) (0x40040034)) |= 0x20F8;
+
+    //validate message object
+    *((volatile uint32_t *) (0x40040034)) |= 0x8000;
+
+    //configure message control (set EOB and DLC(#4) and RMTEN)
+    *((volatile uint32_t *) (0x40040038)) |= 0x284;
+
+    //write to MNUM to initiate transfer
+    *((volatile uint32_t *) (0x40040020)) = 0x6;
 }
 
 /*
@@ -172,9 +206,35 @@ void CAN_response(){
  * -configures receive message object for desired data
  * -sends remote frame requesting desired data
  */
-void CAN_request(){
+void CAN_remote_init(){
+    //set WRNRD, arb,control,
+    *((volatile uint32_t *) (0x40040024)) = 0xB0;
 
+    //set ID and direction
+    *((volatile uint32_t *) (0x40040034)) = 0x80F8;
+
+    //configure message control (set EOB and DLC(#4))
+    *((volatile uint32_t *) (0x40040038)) = 0x84;
+
+    //write to MNUM to initiate transfer
+    *((volatile uint32_t *) (0x40040020)) = 0x6;
 }
+
+
+/*
+ * Sends a remote frame after it has been configured
+ *
+ * remote init must be called before this
+ */
+void CAN_remote_send(){
+    //set WRNRD, txqst
+    *((volatile uint32_t *) (0x40040024)) = 0x84;
+
+    //write to MNUM to initiate transfer
+    *((volatile uint32_t *) (0x40040020)) = 0x6;
+}
+
+
 
 /*
  * Hard coded for specific CAN bit timing
