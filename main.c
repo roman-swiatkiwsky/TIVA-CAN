@@ -26,7 +26,7 @@ int main(void)
 void transmitter (){
     CAN_init();
     CAN_join_network();
-    CAN_transmit_init();
+    CAN_transmit_init(0x83C,0x4,0x1);
 
 }
 

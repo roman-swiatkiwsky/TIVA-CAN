@@ -3,7 +3,7 @@
 
 
 void CAN_init();
-void CAN_transmit_init();
+void CAN_transmit_init(uint16_t,uint8_t, uint8_t);
 void CAN_read_init();
 uint32_t CAN_read();
 uint32_t CAN_check_message();

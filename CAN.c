@@ -42,23 +42,35 @@ void CAN_join_network(){
 }
 
 /*
- * Configures a message object
+ * Configures a transmit message object
+ *
+ * Can configure:
+ * - ID
+ * - DLC (payload size, 0 to 8 bytes)
+ * - Message object number
  */
-void CAN_transmit_init(){
+void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
     //set WRNRD (write, not read), mask, arb,control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB)
-    *((volatile uint32_t *) (0x40040034)) |= 0x20F0;
+    ID <<= 2;
+    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+    *((volatile uint32_t *) (0x40040034)) |= ID;
+
 
     //validate message object
     *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
     //configure message control (set EOB and DLC(#4))
-    *((volatile uint32_t *) (0x40040038)) |= 0x84;
+    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
+    *((volatile uint32_t *) (0x40040038)) |= DLC;
+    *((volatile uint32_t *) (0x40040038)) |= 0x80;
+
+
 
     //write to MNUM to initiate transfer
-    *((volatile uint32_t *) (0x40040020)) |= 0x1;
+    *((volatile uint8_t *) (0x40040020)) = MNUM;
 }
 
 /*
