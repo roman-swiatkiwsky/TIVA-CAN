@@ -80,17 +80,19 @@ void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
  * This is how you send new data once the transmit message object is configured with
  * CAN_transmit
  *
- * Takes data as 32 bit number to be sent
+ * Takes a pointer to an array of 8 bytes
  *
  * MNUM must match that of a configured transmit object
  */
-void CAN_send_data(uint32_t dat,uint8_t MNUM){
+void CAN_send_data(uint8_t DAT[8],uint8_t MNUM){
     //set wrnrd and dat
     *((volatile uint32_t *) (0x40040024)) |= 0x86;
 
     //update data
-    *((volatile uint32_t *) (0x4004003C)) = dat&0xFFFF;
-    *((volatile uint32_t *) (0x40040040)) = (dat>>16)&0xFFFF;
+    *((volatile uint32_t *) (0x4004003C)) = *((uint16_t*)DAT);
+    *((volatile uint32_t *) (0x40040040)) = *((uint16_t*)DAT+2);
+    *((volatile uint32_t *) (0x40040044)) = *((uint16_t*)DAT+4);
+    *((volatile uint32_t *) (0x40040048)) = *((uint16_t*)DAT+6);
 
     //set newdat and txrqst
     *((volatile uint32_t *) (0x40040038)) |= 0x8100;

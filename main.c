@@ -9,7 +9,7 @@ int main(void)
 {
     init_uart();
     uart_interrupt_init();
-    reciever();
+    transmitter();
 
     //infinite loop
     while (1) {
@@ -68,7 +68,9 @@ void uart_handler_transmitter(){
 
     //send char over CAN
     uint8_t in = *((volatile uint8_t*)(0x4000C000));
-    CAN_send_data((uint32_t)in,0x1);
+    uint8_t DAT[8];
+    DAT[0] = in;
+    CAN_send_data(DAT,0x1);
 
 
     return;
