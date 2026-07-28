@@ -2,53 +2,19 @@
 #include <sys/types.h>
 #include "CAN.h"
 #include "lib_c.h"
+#include "tests.h"
 void transmitter();
 void reciever();
 
 int main(void)
 {
-    init_uart();
-    uart_interrupt_init();
-    transmitter();
-
-    //infinite loop
+    //ENTER TEST ROUTINE
+    TEST_eight_bytes_B();
     while (1) {
 
     }
 
 }
-
-/*
- * Routine ran by the transmitting CAN node
- */
-void transmitter (){
-    CAN_init();
-    CAN_join_network();
-    CAN_transmit_init(0xF,0x8,0x1);
-    //uint8_t dat[8] = {0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0};
-    //CAN_send_data(dat,0x1 );
-
-}
-
-/*
- * Routine ran by the recieving CAN node
- */
-void reciever(){
-    CAN_init();
-    CAN_read_init(0xF,0x8,0x2);
-    CAN_join_network();
-    while (1) {
-        uint32_t result = CAN_check_message();
-        if (result != 0){
-            output_string("I received: ");
-            result = CAN_read(0x2);
-            output_character(result);
-            output_string("\n\r");
-
-        }
-    }
-}
-
 
 
 
@@ -56,11 +22,10 @@ void reciever(){
  * This source is currently shared by CAN transmitter and receiver
  * Take notice which it is currently written for
  *
- * Probably best to come up with a solution for both
  *
  *
  * THIS MUST READ THE NEW DATA TO CLEAR THE INTERRUPT
- *AS MENTIONED ON PAGE 928 UNDER RXRIS
+ * AS MENTIONED ON PAGE 928 UNDER RXRIS
  * AS FIFO IS NOT ENABLED!!!!!
  */
 void uart_handler_transmitter(){
