@@ -12,3 +12,4 @@ void CAN_remote_init();
 void CAN_SET_RATE();
 void CAN_join_network();
 void CAN_send_data(uint8_t[8],uint8_t);
+void CAN_remote_send();

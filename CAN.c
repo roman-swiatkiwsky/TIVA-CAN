@@ -194,6 +194,11 @@ void CAN_source_init(){
     //configure message control (set EOB and DLC(#4) and RMTEN)
     *((volatile uint32_t *) (0x40040038)) |= 0x284;
 
+    //set DATA
+    *((volatile uint32_t *) (0x4004003C)) = 0xFAFA;
+    *((volatile uint32_t *) (0x40040040)) = 0x1C1C;
+
+
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) = 0x6;
 }
@@ -204,7 +209,6 @@ void CAN_source_init(){
  *
  *
  * -configures receive message object for desired data
- * -sends remote frame requesting desired data
  */
 void CAN_remote_init(){
     //set WRNRD, arb,control,

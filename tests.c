@@ -77,4 +77,34 @@ void TEST_eight_bytes_B(){
 }
 
 
+/*===========================================
+ *
+ * Tests remote frame transfer
+ *
+ *
+ * =========================================
+ */
+//sends request
+void TEST_remote_frame_A(){
+    init_uart();
+    CAN_init();
+    CAN_remote_init();
+    CAN_join_network();
+    CAN_remote_send();
+
+
+}
+//serves requests
+void TEST_remote_frame_B(){
+    init_uart();
+    CAN_init();
+    CAN_source_init();
+    CAN_join_network();
+}
+
+
+
+
+
+
 
