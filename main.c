@@ -3,8 +3,6 @@
 #include "CAN.h"
 #include "lib_c.h"
 #include "tests.h"
-void transmitter();
-void reciever();
 
 int main(void)
 {
