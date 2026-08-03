@@ -17,3 +17,4 @@ Since testing involves two devices, the software that is flashed onto each MCU m
 Due to this constraint, either device will enter a dedicated testing procedure at the start of program execution. 
 
 Tests will be organized by 'A' and 'B' functions; corresponding to either device. This way, only the testing routine has to be changed when flashing the MCU. 
+
