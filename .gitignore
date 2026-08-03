@@ -13,3 +13,5 @@ readme.txt
 .project
 .cproject
 .ccsproject
+/Debug/
+*.kate-swp

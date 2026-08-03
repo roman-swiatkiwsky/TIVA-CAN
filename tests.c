@@ -77,4 +77,38 @@ void TEST_eight_bytes_B(){
 }
 
 
+/*===========================================
+ *
+ * Tests remote frame transfer
+ *
+ * Test A sends request, B services request
+ *
+ * Make sure that A has the data set by B
+ *
+ * =========================================
+ */
+//sends request
+void TEST_remote_frame_A(){
+    init_uart();
+    CAN_init();
+    CAN_remote_init(0xA,8,6);
+    CAN_join_network();
+    CAN_remote_send(6);
+
+
+}
+//serves requests
+void TEST_remote_frame_B(){
+    init_uart();
+    CAN_init();
+    uint8_t dat[8] = {0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0};
+    CAN_source_init(dat,0xA,8,6);
+    CAN_join_network();
+}
+
+
+
+
+
+
 

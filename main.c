@@ -3,13 +3,11 @@
 #include "CAN.h"
 #include "lib_c.h"
 #include "tests.h"
-void transmitter();
-void reciever();
 
 int main(void)
 {
     //ENTER TEST ROUTINE
-    TEST_eight_bytes_B();
+    TEST_remote_frame_A();
     while (1) {
 
     }

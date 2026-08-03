@@ -181,21 +181,32 @@ uint32_t CAN_check_message(){
  * a different CAN device on the network may request the data here
  * with a remote frame
  */
-void CAN_source_init(){
-    //set WRNRD (write, not read), mask, arb,control, DATA A
-    *((volatile uint32_t *) (0x40040024)) |= 0xF2;
+void CAN_source_init(uint8_t DAT[8],uint16_t ID, uint8_t DLC, uint8_t MNUM){
+    //set WRNRD (write, not read), mask, arb,control, DATA
+    *((volatile uint32_t *) (0x40040024)) |= 0xF3;
 
-    //set 11 bit identifier (ARB)
-    *((volatile uint32_t *) (0x40040034)) |= 0x20F8;
-
-    //validate message object
-    *((volatile uint32_t *) (0x40040034)) |= 0x8000;
+    //validate, DIR, ID
+    ID <<= 2;
+    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+    *((volatile uint32_t *) (0x40040034)) |= ID;
+    *((volatile uint32_t *) (0x40040034)) |= 0xA000;
 
     //configure message control (set EOB and DLC(#4) and RMTEN)
-    *((volatile uint32_t *) (0x40040038)) |= 0x284;
+    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
+    *((volatile uint32_t *) (0x40040038)) |= 0x280;
+    *((volatile uint32_t *) (0x40040038)) |= DLC;
+
+
+    //set DATA
+    *((volatile uint32_t *) (0x4004003C)) = *((uint16_t*)DAT);
+    *((volatile uint32_t *) (0x40040040)) = *((uint16_t*)(DAT+2));
+    *((volatile uint32_t *) (0x40040044)) = *((uint16_t*)(DAT+4));
+    *((volatile uint32_t *) (0x40040048)) = *((uint16_t*)(DAT+6));
+
+
 
     //write to MNUM to initiate transfer
-    *((volatile uint32_t *) (0x40040020)) = 0x6;
+    *((volatile uint32_t *) (0x40040020)) = MNUM;
 }
 
 /*
@@ -204,20 +215,26 @@ void CAN_source_init(){
  *
  *
  * -configures receive message object for desired data
- * -sends remote frame requesting desired data
+ * -unsure if DLC matters
  */
-void CAN_remote_init(){
+void CAN_remote_init(uint16_t ID, uint8_t DLC,uint8_t MNUM){
     //set WRNRD, arb,control,
     *((volatile uint32_t *) (0x40040024)) = 0xB0;
 
-    //set ID and direction
-    *((volatile uint32_t *) (0x40040034)) = 0x80F8;
+    //set ID and direction validate
+    ID <<= 2;
+    *((volatile uint32_t *) (0x40040034)) &= 0xDFFFE000;
+    *((volatile uint32_t *) (0x40040034)) |= ID;
+    *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
-    //configure message control (set EOB and DLC(#4))
-    *((volatile uint32_t *) (0x40040038)) = 0x84;
+    //configure message control (set EOB and DLC)
+    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
+    *((volatile uint32_t *) (0x40040038)) = 0x80;
+    *((volatile uint32_t *) (0x40040038)) |= DLC;
+
 
     //write to MNUM to initiate transfer
-    *((volatile uint32_t *) (0x40040020)) = 0x6;
+    *((volatile uint32_t *) (0x40040020)) = MNUM;
 }
 
 
@@ -226,12 +243,12 @@ void CAN_remote_init(){
  *
  * remote init must be called before this
  */
-void CAN_remote_send(){
+void CAN_remote_send(uint8_t MNUM){
     //set WRNRD, txqst
     *((volatile uint32_t *) (0x40040024)) = 0x84;
 
     //write to MNUM to initiate transfer
-    *((volatile uint32_t *) (0x40040020)) = 0x6;
+    *((volatile uint32_t *) (0x40040020)) = MNUM;
 }
 
 
