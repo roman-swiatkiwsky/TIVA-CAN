@@ -7,7 +7,7 @@
 int main(void)
 {
     //ENTER TEST ROUTINE
-    TEST_remote_frame_A();
+    TEST_char_transfer_B();
     while (1) {
 
     }

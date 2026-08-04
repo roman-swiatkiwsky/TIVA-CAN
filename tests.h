@@ -4,3 +4,5 @@ void TEST_eight_bytes_A();
 void TEST_eight_bytes_B();
 void TEST_remote_frame_A();
 void TEST_remote_frame_B();
+void TEST_bit_timing_A();
+void TEST_bit_timing_B();

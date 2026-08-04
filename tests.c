@@ -109,6 +109,48 @@ void TEST_remote_frame_B(){
 
 
 
+//============================================================
+/*  Test bit timing works similarly to char transfer tests,
+ * but changes bit timings via the CAN_SET_RATE function.
+ *
+ * Successful bit timing changes are demonstrated via communication between boards.
+ *
+ * A incorrect or absent data transfer indicates that bit timings are either not
+ * configured correctly, or differ between CAN BUS participants.
+ *
+ */
+//===========================================================
+
+void TEST_bit_timing_A(){
+    init_uart();
+    uart_interrupt_init();
+    CAN_init();
+    CAN_SET_RATE(2,4,13,3);
+    CAN_join_network();
+    CAN_transmit_init(0xF,0x8,0x1);
+}
+
+void TEST_bit_timing_B(){
+    init_uart();
+    CAN_init();
+    CAN_SET_RATE(2,4,13,3);
+    CAN_read_init(0xF,0x8,0x2);
+    CAN_join_network();
+    while (1) {
+        uint32_t result = CAN_check_message();
+        if (result != 0){
+            output_string("I received: ");
+            result = CAN_read(0x2);
+            output_character(result);
+            output_string("\n\r");
+
+        }
+    }
+}
+
+
+
+
 
 
 

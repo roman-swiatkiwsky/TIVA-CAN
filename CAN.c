@@ -256,15 +256,21 @@ void CAN_remote_send(uint8_t MNUM){
 /*
  * Hard coded for specific CAN bit timing
  * CAN module must be ready for configuration when this routine is called
+ *
+ * - Takes bit timing variables
+ * - Will decrement variables for register compatability
  */
-void CAN_SET_RATE(){
+void CAN_SET_RATE(uint8_t BRP, uint8_t SJW, uint8_t TSEG1, uint8_t TSEG2){
+    //CCE in ctl
+    *((volatile uint32_t *) (0x40040000)) |= 0x00000040;
+
     //set BRP to 1
-    *((volatile uint32_t *) (0x4004000C)) = 0x00000001;
+    *((volatile uint32_t *) (0x4004000C)) = BRP - 1;
     //set SJW to 3
-    *((volatile uint32_t *) (0x4004000C)) |= 0x000000C0;
+    *((volatile uint32_t *) (0x4004000C)) |= (SJW -1) << 6;
     //set TSEG1 to 12
-    *((volatile uint32_t *) (0x4004000C)) |= 0x00000C00;
+    *((volatile uint32_t *) (0x4004000C)) |= (TSEG1 - 1) << 8;
     //set TSEG2 to 2
-    *((volatile uint32_t *) (0x4004000C)) |= 0x00002000;
+    *((volatile uint32_t *) (0x4004000C)) |= (TSEG2 - 1) << 12;
 }
 
