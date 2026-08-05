@@ -56,6 +56,7 @@ extern uint32_t __STACK_TOP;
 //*****************************************************************************
 // To be added by user
 void uart_handler_transmitter();
+void CAN_interrupt_handler();
 //*****************************************************************************
 //
 // The vector table.  Note that the proper constructs must be placed on this to
@@ -122,7 +123,7 @@ void (* const g_pfnVectors[])(void) =
     IntDefaultHandler,                      // Timer 3 subtimer B
     IntDefaultHandler,                      // I2C1 Master and Slave
     IntDefaultHandler,                      // Quadrature Encoder 1
-    IntDefaultHandler,                      // CAN0
+    CAN_interrupt_handler,                      // CAN0
     IntDefaultHandler,                      // CAN1
     0,                                      // Reserved
     0,                                      // Reserved

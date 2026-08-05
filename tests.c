@@ -31,8 +31,10 @@ void TEST_char_transfer_A(){
 void TEST_char_transfer_B(){
     init_uart();
     CAN_init();
+    CAN_interupts();
     CAN_read_init(0xF,0x8,0x2);
     CAN_join_network();
+    /*
     while (1) {
         uint32_t result = CAN_check_message();
         if (result != 0){
@@ -43,6 +45,8 @@ void TEST_char_transfer_B(){
 
         }
     }
+    */
+
 }
 
 

@@ -1,5 +1,5 @@
 #include <stdint.h>
-
+#include "lib_c.h"
 
 /*
  * Initializes CAN functionality, and any pre-requisites
@@ -8,6 +8,7 @@
  * -enabling test modes
  * -CAN bit rate (maybe move this to seperate function later?)
  */
+
 
 void CAN_init(){
     //enable clock to CAN module 0
@@ -273,4 +274,23 @@ void CAN_SET_RATE(uint8_t BRP, uint8_t SJW, uint8_t TSEG1, uint8_t TSEG2){
     //set TSEG2 to 2
     *((volatile uint32_t *) (0x4004000C)) |= (TSEG2 - 1) << 12;
 }
+
+/*
+ * Configure and enable CAN interrupts
+ */
+void CAN_interupts(){
+    *((volatile uint32_t *) (0xE000E104)) |= 0x80;
+
+
+    //enable status interrupts, and interrupts as a whole
+    *((volatile uint32_t *) (0x40040000)) |= 6;
+}
+
+void CAN_interrupt_handler(){
+
+    uint32_t TEST = *((volatile uint32_t *) (0x40040004));
+
+    return;
+}
+
 

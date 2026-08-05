@@ -13,3 +13,4 @@ void CAN_SET_RATE(uint8_t BRP, uint8_t SJW, uint8_t TSEG1, uint8_t TSEG2);
 void CAN_join_network();
 void CAN_send_data(uint8_t[8],uint8_t);
 void CAN_remote_send(uint8_t);
+void CAN_interupts();
