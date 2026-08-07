@@ -108,6 +108,21 @@ void echo(){
     return;
 }
 
+/*
+ * Converts bit postion to integer equivalent
+ *
+ * -example: 0b00001000 -> 0d4 since the fourth bit is set
+ */
+uint32_t pos_to_int(uint32_t in){
+    int pos = 0;
+    while ((in&1)==0){
+        pos++;
+        in >>= 1;
+    }
+    pos++;
+    return pos;
+}
+
 
 
 

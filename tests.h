@@ -6,3 +6,5 @@ void TEST_remote_frame_A();
 void TEST_remote_frame_B();
 void TEST_bit_timing_A();
 void TEST_bit_timing_B();
+void TEST_OBD_com();
+void TEST_dummy_ECU();

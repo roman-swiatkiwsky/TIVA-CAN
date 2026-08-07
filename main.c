@@ -7,7 +7,7 @@
 int main(void)
 {
     //ENTER TEST ROUTINE
-    TEST_char_transfer_B();
+    TEST_bit_timing_B();
     while (1) {
 
     }

@@ -118,15 +118,19 @@ void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM){
     *((volatile uint32_t *) (0x40040034)) |= ID;
 
     //id masking
-    *((volatile uint32_t *) (0x4004002C)) = 0x00001FFC;
+    //*((volatile uint32_t *) (0x4004002C)) = 0x00001FFC;
+    //*((volatile uint32_t *) (0x4004002C)) = 0x0;
+    //*((volatile uint32_t *) (0x40040028)) = 0x0;
 
-    //validate message object
-    *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
     //configure message control (set EOB and DLC(#4))
     *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
-    *((volatile uint32_t *) (0x40040038)) |= 0x1080;
+    *((volatile uint32_t *) (0x40040038)) |= 0x0080;
     *((volatile uint32_t *) (0x40040038)) |= DLC;
+    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFEFFF;
+
+    //validate message object
+    *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) = MNUM;
@@ -142,7 +146,7 @@ uint32_t CAN_read(uint8_t MNUM){
     //indicate reading DATA A and DATA B from Message object
     *((volatile uint32_t *) (0x40040084)) = 0x13;
     //write MNUM to CRQ
-    *((volatile uint32_t *) (0x40040080)) = 0x2;
+    *((volatile uint32_t *) (0x40040080)) = MNUM;
 
     //clear new dat to indicate successful read
     *((volatile uint32_t *) (0x40040098)) &= 0x7FFF;
@@ -286,9 +290,22 @@ void CAN_interupts(){
     *((volatile uint32_t *) (0x40040000)) |= 6;
 }
 
-void CAN_interrupt_handler(){
 
-    uint32_t TEST = *((volatile uint32_t *) (0x40040004));
+/*
+ * Entered based on configuration of CAN interrupts
+ *
+ * - Only used if you use CAN_interrupts function
+ *
+ * Will probably trigger on the event of an error, or successful transmit/receive
+ */
+void CAN_interrupt_handler(){
+    //clears CAN interrupt by reading INT register
+    uint32_t INT = *((volatile uint32_t *) (0x40040010));
+    uint32_t STS = *((volatile uint32_t *) (0x40040004));
+    if ((STS&8) != 0){
+        output_string("Successful transmit detected\n\r");
+    }
+
 
     return;
 }

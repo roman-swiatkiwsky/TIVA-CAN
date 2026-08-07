@@ -7,3 +7,4 @@ void output_string(char[]);
 void uart_interrupt_init();
 void UART_HANDLER_EXIT();
 void echo();
+uint32_t pos_to_int(uint32_t in);

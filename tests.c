@@ -32,9 +32,9 @@ void TEST_char_transfer_B(){
     init_uart();
     CAN_init();
     CAN_interupts();
-    CAN_read_init(0xF,0x8,0x2);
+    CAN_read_init(0xF,0x8,0x3);
     CAN_join_network();
-    /*
+
     while (1) {
         uint32_t result = CAN_check_message();
         if (result != 0){
@@ -45,7 +45,7 @@ void TEST_char_transfer_B(){
 
         }
     }
-    */
+
 
 }
 
@@ -129,22 +129,24 @@ void TEST_bit_timing_A(){
     init_uart();
     uart_interrupt_init();
     CAN_init();
-    CAN_SET_RATE(2,4,13,3);
+    //CAN_SET_RATE(2,3,12,3);
     CAN_join_network();
-    CAN_transmit_init(0xF,0x8,0x1);
+    CAN_transmit_init(0x1,0x8,0x1);
 }
 
 void TEST_bit_timing_B(){
     init_uart();
     CAN_init();
-    CAN_SET_RATE(2,4,13,3);
-    CAN_read_init(0xF,0x8,0x2);
+    //CAN_SET_RATE(2,3,12,3);
+    CAN_read_init(0x2,0x8,0x1);
     CAN_join_network();
     while (1) {
         uint32_t result = CAN_check_message();
+        //result = *((volatile uint32_t *) (0x40040004));
         if (result != 0){
+            //*((volatile uint32_t *) (0x40040004)) ^= 0x10;
             output_string("I received: ");
-            result = CAN_read(0x2);
+            result = CAN_read(0x1);
             output_character(result);
             output_string("\n\r");
 
@@ -152,6 +154,53 @@ void TEST_bit_timing_B(){
     }
 }
 
+
+/*============================================
+ *
+ * Preliminary OBD2 Test
+ *
+ * ============================================
+ */
+
+void TEST_OBD_com(){
+    init_uart();
+    CAN_init();
+    //CAN_interupts();
+    CAN_SET_RATE(2,3,12,3);
+    CAN_read_init(0x7E8,0x8,0x2);
+    CAN_transmit_init(0x7DF,0x8,0x1);
+    CAN_join_network();
+    uint8_t dat[8] = {0x2,0x1,0x0,0xAA,0xAA,0xAA,0xAA,0xAA};
+    CAN_send_data(dat, 1);
+    //poll for response
+    while (1) {
+        uint32_t result = CAN_check_message();
+        if (result != 0){
+            result = CAN_read(0x2);
+        }
+    }
+}
+
+void TEST_dummy_ECU(){
+    init_uart();
+    CAN_init();
+    //CAN_SET_RATE(2,4,13,3);
+    CAN_read_init(0x7DF,0x8,0x2);
+    CAN_transmit_init(0x7E8,0x8,0x1);
+    CAN_join_network();
+
+    uint8_t dat[8] = {0x6,0x41,0x0,0x12,0x34,0x56,0x78,0xAA};
+    CAN_send_data(dat, 1);
+
+    //poll for response
+    while (1) {
+        uint32_t result = CAN_check_message();
+        if (result != 0){
+            uint8_t dat[8] = {0x6,0x41,0x0,0x12,0x34,0x56,0x78,0xAA};
+            CAN_send_data(dat, 1);
+        }
+    }
+}
 
 
 
