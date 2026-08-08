@@ -164,14 +164,13 @@ void TEST_bit_timing_B(){
 
 void TEST_OBD_com(){
     init_uart();
-    CAN_init(0);
-    //CAN_interupts();
+    CAN_init(1);
+    CAN_test_init(1);
     CAN_SET_RATE(2,3,12,3);
     CAN_read_init(0x7E8,0x8,0x2,1);
-    CAN_transmit_init(0x7DF,0x8,0x1);
     CAN_join_network();
-    uint8_t dat[8] = {0x2,0x1,0x0,0xAA,0xAA,0xAA,0xAA,0xAA};
-    CAN_send_data(dat, 1);
+    //uint8_t dat[8] = {0x2,0x1,0x0,0xAA,0xAA,0xAA,0xAA,0xAA};
+    //CAN_send_data(dat, 1);
     //poll for response
     while (1) {
         uint32_t result = CAN_check_message();

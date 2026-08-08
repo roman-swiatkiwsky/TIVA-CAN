@@ -4,8 +4,7 @@
 /*
  * Initializes CAN functionality, and any pre-requisites
  *
- * -GPIO init
- * -enabling test modes
+ * -GPIO init for CAN pins
  * -Disable auto-retransmit (DAR)
  */
 
@@ -30,6 +29,16 @@ void CAN_init(uint8_t DAR){
 
     //init mode enabled by default
     if (DAR){*((volatile uint32_t *) (0x40040000)) |= 0x20;}
+}
+
+/*
+ * Enable CAN test features
+ */
+void CAN_test_init(uint8_t SILENT){
+    //enter test mode
+    *((volatile uint32_t *) (0x40040000)) |= 0x80;
+    if (SILENT){*((volatile uint32_t *) (0x40040014)) |= 0x8;}
+
 }
 
 /*
