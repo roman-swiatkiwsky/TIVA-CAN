@@ -6,11 +6,11 @@
  *
  * -GPIO init
  * -enabling test modes
- * -CAN bit rate (maybe move this to seperate function later?)
+ * -Disable auto-retransmit (DAR)
  */
 
 
-void CAN_init(){
+void CAN_init(uint8_t DAR){
     //enable clock to CAN module 0
     *((volatile uint32_t *) (0x400FE634)) |= 1;
 
@@ -28,10 +28,8 @@ void CAN_init(){
     //select CAN RX TX for corresponding pins
     *((volatile uint32_t *) (0x4000552C)) |= 0x880000;
 
-    /*
-     * CAN into INIT and/or test mode
-     */
-    *((volatile uint32_t *) (0x40040000)) |= 1;
+    //init mode enabled by default
+    if (DAR){*((volatile uint32_t *) (0x40040000)) |= 0x20;}
 }
 
 /*

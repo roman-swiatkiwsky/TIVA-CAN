@@ -23,14 +23,14 @@
 void TEST_char_transfer_A(){
     init_uart();
     uart_interrupt_init();
-    CAN_init();
+    CAN_init(1);
     CAN_join_network();
     CAN_transmit_init(0xF,0x8,0x1);
 }
 
 void TEST_char_transfer_B(){
     init_uart();
-    CAN_init();
+    CAN_init(0);
     CAN_read_init(0xA,0x8,0x2,0);
     CAN_interupts();
     CAN_join_network();
@@ -59,7 +59,7 @@ void TEST_char_transfer_B(){
 
 void TEST_eight_bytes_A(){
     init_uart();
-    CAN_init();
+    CAN_init(0);
     CAN_join_network();
     CAN_transmit_init(0xF,0x8,0x1);
 
@@ -69,7 +69,7 @@ void TEST_eight_bytes_A(){
 
 void TEST_eight_bytes_B(){
     init_uart();
-    CAN_init();
+    CAN_init(0);
     CAN_read_init(0xF,0x8,0x2,1);
     CAN_join_network();
     while (1) {
@@ -94,7 +94,7 @@ void TEST_eight_bytes_B(){
 //sends request
 void TEST_remote_frame_A(){
     init_uart();
-    CAN_init();
+    CAN_init(0);
     CAN_remote_init(0xA,8,6);
     CAN_join_network();
     CAN_remote_send(6);
@@ -104,7 +104,7 @@ void TEST_remote_frame_A(){
 //serves requests
 void TEST_remote_frame_B(){
     init_uart();
-    CAN_init();
+    CAN_init(0);
     uint8_t dat[8] = {0x12,0x34,0x56,0x78,0x9A,0xBC,0xDE,0xF0};
     CAN_source_init(dat,0xA,8,6);
     CAN_join_network();
@@ -128,7 +128,7 @@ void TEST_remote_frame_B(){
 void TEST_bit_timing_A(){
     init_uart();
     uart_interrupt_init();
-    CAN_init();
+    CAN_init(0);
     //CAN_SET_RATE(2,3,12,3);
     CAN_join_network();
     CAN_transmit_init(0x1,0x8,0x1);
@@ -136,7 +136,7 @@ void TEST_bit_timing_A(){
 
 void TEST_bit_timing_B(){
     init_uart();
-    CAN_init();
+    CAN_init(0);
     //CAN_SET_RATE(2,3,12,3);
     CAN_read_init(0x2,0x8,0x1,1);
     CAN_join_network();
@@ -164,7 +164,7 @@ void TEST_bit_timing_B(){
 
 void TEST_OBD_com(){
     init_uart();
-    CAN_init();
+    CAN_init(0);
     //CAN_interupts();
     CAN_SET_RATE(2,3,12,3);
     CAN_read_init(0x7E8,0x8,0x2,1);
@@ -183,7 +183,7 @@ void TEST_OBD_com(){
 
 void TEST_dummy_ECU(){
     init_uart();
-    CAN_init();
+    CAN_init(0);
     //CAN_SET_RATE(2,4,13,3);
     CAN_read_init(0x7DF,0x8,0x2,1);
     CAN_transmit_init(0x7E8,0x8,0x1);
