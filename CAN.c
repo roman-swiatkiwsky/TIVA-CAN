@@ -106,9 +106,15 @@ void CAN_send_data(uint8_t DAT[8],uint8_t MNUM){
 /*
  * Initializes a CAN object to be read from
  *
+ * Parameters
+ * -ID: CAN message ID, which is important if you only want to receive certain frames
+ * -DLC: Length of received data in bytes. Max of 8
+ * -MNUM: Message object which will be configured and hold data
+ * -MATCH: Specify received frames must match ID in order to populate message object
+ *
  *
  */
-void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM){
+void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM, uint8_t MATCH){
     //set WRNRD (write, not read), mask, arb, control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
@@ -118,16 +124,15 @@ void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM){
     *((volatile uint32_t *) (0x40040034)) |= ID;
 
     //id masking
-    //*((volatile uint32_t *) (0x4004002C)) = 0x00001FFC;
-    //*((volatile uint32_t *) (0x4004002C)) = 0x0;
-    //*((volatile uint32_t *) (0x40040028)) = 0x0;
+    *((volatile uint32_t *) (0x4004002C)) = 0x0;
 
 
     //configure message control (set EOB and DLC(#4))
-    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
-    *((volatile uint32_t *) (0x40040038)) |= 0x0080;
+    *((volatile uint32_t *) (0x40040038)) = 0x0;
+    *((volatile uint32_t *) (0x40040038)) |= 0x80;
     *((volatile uint32_t *) (0x40040038)) |= DLC;
-    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFEFFF;
+
+    if (!MATCH){*((volatile uint32_t *) (0x40040038)) |= 0x1000;}
 
     //validate message object
     *((volatile uint32_t *) (0x40040034)) |= 0x8000;

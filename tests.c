@@ -31,8 +31,8 @@ void TEST_char_transfer_A(){
 void TEST_char_transfer_B(){
     init_uart();
     CAN_init();
+    CAN_read_init(0xA,0x8,0x2,0);
     CAN_interupts();
-    CAN_read_init(0xF,0x8,0x3);
     CAN_join_network();
 
     while (1) {
@@ -70,7 +70,7 @@ void TEST_eight_bytes_A(){
 void TEST_eight_bytes_B(){
     init_uart();
     CAN_init();
-    CAN_read_init(0xF,0x8,0x2);
+    CAN_read_init(0xF,0x8,0x2,1);
     CAN_join_network();
     while (1) {
         uint32_t result = CAN_check_message();
@@ -138,7 +138,7 @@ void TEST_bit_timing_B(){
     init_uart();
     CAN_init();
     //CAN_SET_RATE(2,3,12,3);
-    CAN_read_init(0x2,0x8,0x1);
+    CAN_read_init(0x2,0x8,0x1,1);
     CAN_join_network();
     while (1) {
         uint32_t result = CAN_check_message();
@@ -167,7 +167,7 @@ void TEST_OBD_com(){
     CAN_init();
     //CAN_interupts();
     CAN_SET_RATE(2,3,12,3);
-    CAN_read_init(0x7E8,0x8,0x2);
+    CAN_read_init(0x7E8,0x8,0x2,1);
     CAN_transmit_init(0x7DF,0x8,0x1);
     CAN_join_network();
     uint8_t dat[8] = {0x2,0x1,0x0,0xAA,0xAA,0xAA,0xAA,0xAA};
@@ -185,7 +185,7 @@ void TEST_dummy_ECU(){
     init_uart();
     CAN_init();
     //CAN_SET_RATE(2,4,13,3);
-    CAN_read_init(0x7DF,0x8,0x2);
+    CAN_read_init(0x7DF,0x8,0x2,1);
     CAN_transmit_init(0x7E8,0x8,0x1);
     CAN_join_network();
 
