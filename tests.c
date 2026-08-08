@@ -25,13 +25,13 @@ void TEST_char_transfer_A(){
     uart_interrupt_init();
     CAN_init(1);
     CAN_join_network();
-    CAN_transmit_init(0xF,0x8,0x1);
+    CAN_transmit_init(0xA001,0x8,0x1);
 }
 
 void TEST_char_transfer_B(){
     init_uart();
     CAN_init(0);
-    CAN_read_init(0xA,0x8,0x2,0);
+    CAN_read_init(0xA001,0x8,0x2,1);
     CAN_interupts();
     CAN_join_network();
 

@@ -4,8 +4,8 @@
 
 void CAN_init(uint8_t DAR);
 void CAN_test_init(uint8_t SILENT);
-void CAN_transmit_init(uint16_t,uint8_t, uint8_t);
-void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM, uint8_t MATCH);
+void CAN_transmit_init(uint32_t,uint8_t, uint8_t);
+void CAN_read_init(uint32_t ID, uint8_t DLC, uint8_t MNUM, uint8_t MATCH);
 uint32_t CAN_read(uint8_t);
 uint32_t CAN_check_message();
 void CAN_source_init(uint8_t[8],uint16_t,uint8_t,uint8_t);

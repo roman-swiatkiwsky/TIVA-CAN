@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include "lib_c.h"
 
+void set_ID_29(uint32_t ID);
+
 /*
  * Initializes CAN functionality, and any pre-requisites
  *
@@ -54,17 +56,21 @@ void CAN_join_network(){
  *
  * Can configure:
  * - ID
+ *      -Automatically detects 29 bit IDs, and sets accordingly
  * - DLC (payload size, 0 to 8 bytes)
  * - Message object number
  */
-void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
+void CAN_transmit_init(uint32_t ID,uint8_t DLC, uint8_t MNUM){
     //set WRNRD (write, not read), mask, arb,control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB)
-    ID <<= 2;
-    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
-    *((volatile uint32_t *) (0x40040034)) |= ID;
+    if ((ID&0xFFFFF800) != 0){set_ID_29(ID);} else {
+        ID <<= 2;
+        *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+        *((volatile uint32_t *) (0x40040034)) |= ID;
+    }
+    //set direction
     *((volatile uint32_t *) (0x40040034)) |= 0x2000;
 
 
@@ -115,22 +121,26 @@ void CAN_send_data(uint8_t DAT[8],uint8_t MNUM){
  *
  * Parameters
  * -ID: CAN message ID, which is important if you only want to receive certain frames
+ *      -Automatically detects 29 bit IDs, and sets accordingly
  * -DLC: Length of received data in bytes. Max of 8
  * -MNUM: Message object which will be configured and hold data
  * -MATCH: Specify received frames must match ID in order to populate message object
  *
  *
  */
-void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM, uint8_t MATCH){
+void CAN_read_init(uint32_t ID, uint8_t DLC, uint8_t MNUM, uint8_t MATCH){
     //set WRNRD (write, not read), mask, arb, control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB) and direction
-    ID <<= 2;
-    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
-    *((volatile uint32_t *) (0x40040034)) |= ID;
+    if ((ID&0xFFFFF800) != 0){set_ID_29(ID);} else {
+        ID <<= 2;
+        *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+        *((volatile uint32_t *) (0x40040034)) |= ID;
+    }
 
-    //id masking
+
+    //all masking bits 'don't care' if no match used
     *((volatile uint32_t *) (0x4004002C)) = 0x0;
 
 
@@ -147,6 +157,18 @@ void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM, uint8_t MATCH){
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) = MNUM;
 
+}
+
+/*
+ * sets 29 bit extended CAN ID in IF1
+ */
+void set_ID_29(uint32_t ID){
+    //set XTD
+    *((volatile uint32_t *) (0x40040034)) = 0x4000;
+
+    *((volatile uint32_t *) (0x40040030)) = ID&0xFFFF;
+    ID >>= 16;
+    *((volatile uint32_t *) (0x40040034)) |= ID;
 }
 
 /*
