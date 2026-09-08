@@ -100,7 +100,7 @@ void CAN_transmit_init(uint32_t ID,uint8_t DLC, uint8_t MNUM){
  */
 void CAN_send_data(uint8_t DAT[8],uint8_t MNUM){
     //set wrnrd and dat
-    *((volatile uint32_t *) (0x40040024)) |= 0x87;
+    *((volatile uint32_t *) (0x40040024)) = 0x87;
 
     //update data
     *((volatile uint32_t *) (0x4004003C)) = *((uint16_t*)DAT);
@@ -178,12 +178,12 @@ void set_ID_29(uint32_t ID){
  */
 uint32_t CAN_read(uint8_t MNUM){
     //indicate reading DATA A and DATA B from Message object
-    *((volatile uint32_t *) (0x40040084)) = 0x13;
+    *((volatile uint32_t *) (0x40040084)) = 0x33;
     //write MNUM to CRQ
     *((volatile uint32_t *) (0x40040080)) = MNUM;
 
-    //clear new dat to indicate successful read
-    *((volatile uint32_t *) (0x40040098)) &= 0x7FFF;
+    //clear new dat and msglost to indicate successful read
+    *((volatile uint32_t *) (0x40040098)) &= 0x3FFF;
 
     //change to write
     *((volatile uint32_t *) (0x40040084)) |= 0x80;
@@ -199,6 +199,11 @@ uint32_t CAN_read(uint8_t MNUM){
     dat |= *((volatile uint32_t*)(0x400400A0));
     dat <<= 16;
     dat |= *((volatile uint32_t*)(0x4004009C));
+
+    if ((dat&0xFF00) == 0x4100){
+        output_string("found it!\n\r");
+    }
+
     return dat;
 }
 
@@ -336,11 +341,11 @@ void CAN_interrupt_handler(){
     //clears CAN interrupt by reading INT register
     uint32_t INT = *((volatile uint32_t *) (0x40040010));
     uint32_t STS = *((volatile uint32_t *) (0x40040004));
+    /*
     if ((STS&8) != 0){
         output_string("Successful transmit detected\n\r");
     }
-
-
+    */
     return;
 }
 

@@ -7,7 +7,7 @@
 int main(void)
 {
     //ENTER TEST ROUTINE
-    TEST_char_transfer_A();
+    TEST_OBD_com();
     while (1) {
 
     }
@@ -31,12 +31,16 @@ void uart_handler_transmitter(){
     *((volatile uint32_t *) (0x4000C044)) |= 0x10;
     echo();
 
+    /*
     //send char over CAN
     uint8_t in = *((volatile uint8_t*)(0x4000C000));
     uint8_t DAT[8];
     DAT[0] = in;
     CAN_send_data(DAT,0x1);
+    */
 
+    uint8_t dat[8] = {0x2,0x1,0x0,0xCC,0xCC,0xCC,0xCC,0xCC};
+    CAN_send_data(dat, 0x2);
 
     return;
 }
