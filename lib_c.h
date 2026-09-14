@@ -8,3 +8,6 @@ void uart_interrupt_init();
 void UART_HANDLER_EXIT();
 void echo();
 uint32_t pos_to_int(uint32_t in);
+void timer_init();
+void fpu_init();
+void itoa (int n, char s[]);

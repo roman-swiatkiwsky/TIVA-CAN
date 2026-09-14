@@ -200,9 +200,6 @@ uint32_t CAN_read(uint8_t MNUM){
     dat <<= 16;
     dat |= *((volatile uint32_t*)(0x4004009C));
 
-    if ((dat&0xFF00) == 0x4100){
-        output_string("found it!\n\r");
-    }
 
     return dat;
 }

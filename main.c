@@ -4,46 +4,19 @@
 #include "lib_c.h"
 #include "tests.h"
 
+
 int main(void)
 {
     //ENTER TEST ROUTINE
-    TEST_OBD_com();
     while (1) {
-
+        TEST_OBD_RPM();
     }
 
 }
 
 
 
-/*
- * This source is currently shared by CAN transmitter and receiver
- * Take notice which it is currently written for
- *
- *
- *
- * THIS MUST READ THE NEW DATA TO CLEAR THE INTERRUPT
- * AS MENTIONED ON PAGE 928 UNDER RXRIS
- * AS FIFO IS NOT ENABLED!!!!!
- */
-void uart_handler_transmitter(){
-    //clear interrupt
-    *((volatile uint32_t *) (0x4000C044)) |= 0x10;
-    echo();
 
-    /*
-    //send char over CAN
-    uint8_t in = *((volatile uint8_t*)(0x4000C000));
-    uint8_t DAT[8];
-    DAT[0] = in;
-    CAN_send_data(DAT,0x1);
-    */
-
-    uint8_t dat[8] = {0x2,0x1,0x0,0xCC,0xCC,0xCC,0xCC,0xCC};
-    CAN_send_data(dat, 0x2);
-
-    return;
-}
 
 
 

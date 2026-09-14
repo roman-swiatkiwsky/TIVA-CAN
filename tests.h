@@ -8,3 +8,6 @@ void TEST_bit_timing_A();
 void TEST_bit_timing_B();
 void TEST_OBD_com();
 void TEST_dummy_ECU();
+void TEST_OBD_RPM();
+void TEST_itoa();
+void TEST_OBD_RPM_ECU();

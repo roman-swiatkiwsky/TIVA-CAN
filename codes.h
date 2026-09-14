@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 /*
  * This file contains message data for OBDII messages. These will not work for all vehicles,
  * particulary if 11 bit CAN IDs are required

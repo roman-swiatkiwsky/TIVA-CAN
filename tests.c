@@ -1,6 +1,10 @@
 #include "CAN.h"
 #include "lib_c.h"
 #include "codes.h"
+#include "interrupt_handler.h"
+#include "OBD.h"
+#include <stdint.h>
+#include "tests.h"
 /*
  * Testing routines for either device
  *
@@ -21,7 +25,10 @@
  */
 //===========================================================
 
+
 void TEST_char_transfer_A(){
+    //uses uart handler to echo character back to terminal
+    Handler_routine = Handler_echo;
     init_uart();
     uart_interrupt_init();
     CAN_init(0);
@@ -161,27 +168,30 @@ void TEST_bit_timing_B(){
 
 /*============================================
  *
- * Preliminary OBD2 Test
+ * Preliminary OBD2 Tests
+ *
+ * Message is sent on UART interrupt trigger
  *
  * ============================================
  */
+void TEST_OBD_com_handler(){
+    uint8_t dat[8] = {0x2,0x1,0x0,0xCC,0xCC,0xCC,0xCC,0xCC};
+    CAN_send_data(dat, 0x2);
+}
 
 void TEST_OBD_com(){
+    Handler_routine = TEST_OBD_com_handler;
     init_uart();
     uart_interrupt_init();
     CAN_init(1);
-    //CAN_interupts();
-    //CAN_test_init(1);
     CAN_SET_RATE(2,3,12,3);
-    CAN_read_init(BROADCAST_REQUEST_ID,0x8,0x1,1);
-    CAN_transmit_init(ECU_0_RESPONSE_ID,8 ,0x2 );
+    CAN_read_init(0x18DAF110,0x8,0x1,1);
+    CAN_transmit_init(0x18DB33F1,8 ,0x2 );
     CAN_join_network();
-    //uint8_t dat[8] = {0x2,0x1,0x0,0xAA,0xAA,0xAA,0xAA,0xAA};
-    //CAN_send_data(dat, 1);
-    //poll for response
-    while (1
 
-    ) {
+
+    //poll for response
+    while (1) {
         uint32_t result = CAN_check_message();
         if (result != 0){
             result = CAN_read(0x1);
@@ -208,7 +218,84 @@ void TEST_dummy_ECU(){
     }
 }
 
+//requests RPM data on button press
+void TEST_OBD_RPM_handler(){
+    uint8_t dat[8] = {0x2,0x1,0x0C,0xCC,0xCC,0xCC,0xCC,0xCC};
+    CAN_send_data(dat, 0x2);
+}
 
+/*requests RPM data periodically according to timer initialization
+*
+* Prints current RPM data, then sends request to ECU for current RPM
+* Polling is currently responsible for receiving and setting new RPM, but can
+* be changed to interrupt
+*/
+void TEST_OBD_RPM_TIMER_handler(){
+    char c[10];
+    itoa(RPM,c );
+    output_string(c);
+    output_string("\n\r");
+
+    uint8_t dat[8] = {0x2,0x1,0x0C,0xCC,0xCC,0xCC,0xCC,0xCC};
+    CAN_send_data(dat, 0x2);
+
+
+}
+
+
+void TEST_OBD_RPM(){
+    Handler_routine = TEST_OBD_RPM_handler;
+    Timer_Handler_Routine = TEST_OBD_RPM_TIMER_handler;
+    init_uart();
+    uart_interrupt_init();
+    CAN_init(1);
+    CAN_SET_RATE(2,3,12,3);
+    CAN_read_init(0x18DAF110,0x8,0x1,1);
+    CAN_transmit_init(0x18DB33F1,8 ,0x2 );
+    CAN_join_network();
+    timer_init();
+
+
+    //poll for response
+    while (1) {
+        uint32_t result = CAN_check_message();
+        if (result != 0){
+            result = CAN_read(0x1);
+            RPM = OBD_GET_RPM();
+
+        }
+    }
+}
+
+/*
+ * simulates ECU response to RPM request
+ */
+void TEST_OBD_RPM_ECU(){
+    init_uart();
+    CAN_init(1);
+    CAN_SET_RATE(2,3,12,3);
+    CAN_read_init(0x18DB33F1,0x8,0x2,1);
+    CAN_transmit_init(0x18DAF110,0x8,0x1);
+    CAN_join_network();
+
+    //poll for response
+    while (1) {
+        uint32_t result = CAN_check_message();
+        if (result != 0){
+            result = CAN_read(2);
+            uint8_t dat[8] = {0x4,0x41,0x0C,0x21,0xDC,0xCC,0xCC,0xCC};
+            CAN_send_data(dat, 1);
+        }
+    }
+}
+
+void TEST_itoa(){
+    init_uart();
+    int t = 934;
+    char c[5];
+    itoa(t,c );
+    output_string(c);
+}
 
 
 
