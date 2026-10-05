@@ -1,5 +1,5 @@
 #include <stdint.h>
-
+#include "lib_c.h"
 
 /*
  * This is just a quick example of initialization written in C instead of assembly
@@ -106,6 +106,69 @@ void uart_interrupt_init(){
 void echo(){
     output_character(*((volatile uint8_t *) (0x4000C000)));
     return;
+}
+
+/*
+ * Converts bit postion to integer equivalent
+ *
+ * -example: 0b00001000 -> 0d4 since the fourth bit is set
+ */
+uint32_t pos_to_int(uint32_t in){
+    int pos = 0;
+    while ((in&1)==0){
+        pos++;
+        in >>= 1;
+    }
+    pos++;
+    return pos;
+}
+
+void timer_init(){
+    //enable clock to timer 0
+    *((volatile uint32_t *) (0x400FE604)) |= 0x1;
+
+    //timer 0 periodic
+    *((volatile uint32_t *) (0x40030004)) |= 0x2;
+
+    //setting timer interval
+    *((volatile uint32_t *) (0x40030028)) = 0x00082355;
+
+    //allow interrupts from timer
+    *((volatile uint32_t *) (0x40030018)) |= 1;
+    *((volatile uint32_t *) (0xE000E100)) |= 0x80000;
+
+    //enable timer
+    *((volatile uint32_t *) (0x4003000C)) |= 1;
+}
+
+void fpu_init(){
+    *((volatile uint32_t*)(0xE000ED88)) |= 0x00F00000;
+}
+
+/*
+ * References itoa function found in The C Programming language by Brian W.Kernighan and Dennis M. Ritchie
+ * Referneces reverse function from same source
+ *
+ * inputs:
+ * n is the int to be converted
+ *
+ * s is a provided character array. It is assumed that the array is large enough to hold the final string
+ */
+void itoa (int n, char s[]){
+    int i=0;
+    do {
+        s[i++] = (n % 10)+'0';
+    } while ((n /= 10)> 0);
+    s[i] = '\0';
+    int strlen = i;
+    int j,c;
+    for (i=0,j=strlen-1;i<j;i++,j--){
+        c = s[i];
+        s[i]=s[j];
+        s[j] =c;
+    }
+
+
 }
 
 

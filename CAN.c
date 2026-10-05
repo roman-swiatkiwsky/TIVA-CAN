@@ -1,15 +1,17 @@
 #include <stdint.h>
+#include "lib_c.h"
 
+void set_ID_29(uint32_t ID);
 
 /*
  * Initializes CAN functionality, and any pre-requisites
  *
- * -GPIO init
- * -enabling test modes
- * -CAN bit rate (maybe move this to seperate function later?)
+ * -GPIO init for CAN pins
+ * -Disable auto-retransmit (DAR)
  */
 
-void CAN_init(){
+
+void CAN_init(uint8_t DAR){
     //enable clock to CAN module 0
     *((volatile uint32_t *) (0x400FE634)) |= 1;
 
@@ -27,10 +29,18 @@ void CAN_init(){
     //select CAN RX TX for corresponding pins
     *((volatile uint32_t *) (0x4000552C)) |= 0x880000;
 
-    /*
-     * CAN into INIT and/or test mode
-     */
-    *((volatile uint32_t *) (0x40040000)) |= 1;
+    //init mode enabled by default
+    if (DAR){*((volatile uint32_t *) (0x40040000)) |= 0x20;}
+}
+
+/*
+ * Enable CAN test features
+ */
+void CAN_test_init(uint8_t SILENT){
+    //enter test mode
+    *((volatile uint32_t *) (0x40040000)) |= 0x80;
+    if (SILENT){*((volatile uint32_t *) (0x40040014)) |= 0x8;}
+
 }
 
 /*
@@ -46,17 +56,21 @@ void CAN_join_network(){
  *
  * Can configure:
  * - ID
+ *      -Automatically detects 29 bit IDs, and sets accordingly
  * - DLC (payload size, 0 to 8 bytes)
  * - Message object number
  */
-void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
+void CAN_transmit_init(uint32_t ID,uint8_t DLC, uint8_t MNUM){
     //set WRNRD (write, not read), mask, arb,control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB)
-    ID <<= 2;
-    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
-    *((volatile uint32_t *) (0x40040034)) |= ID;
+    if ((ID&0xFFFFF800) != 0){set_ID_29(ID);} else {
+        ID <<= 2;
+        *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+        *((volatile uint32_t *) (0x40040034)) |= ID;
+    }
+    //set direction
     *((volatile uint32_t *) (0x40040034)) |= 0x2000;
 
 
@@ -86,7 +100,7 @@ void CAN_transmit_init(uint16_t ID,uint8_t DLC, uint8_t MNUM){
  */
 void CAN_send_data(uint8_t DAT[8],uint8_t MNUM){
     //set wrnrd and dat
-    *((volatile uint32_t *) (0x40040024)) |= 0x87;
+    *((volatile uint32_t *) (0x40040024)) = 0x87;
 
     //update data
     *((volatile uint32_t *) (0x4004003C)) = *((uint16_t*)DAT);
@@ -105,31 +119,56 @@ void CAN_send_data(uint8_t DAT[8],uint8_t MNUM){
 /*
  * Initializes a CAN object to be read from
  *
+ * Parameters
+ * -ID: CAN message ID, which is important if you only want to receive certain frames
+ *      -Automatically detects 29 bit IDs, and sets accordingly
+ * -DLC: Length of received data in bytes. Max of 8
+ * -MNUM: Message object which will be configured and hold data
+ * -MATCH: Specify received frames must match ID in order to populate message object
+ *
  *
  */
-void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM){
+void CAN_read_init(uint32_t ID, uint8_t DLC, uint8_t MNUM, uint8_t MATCH){
     //set WRNRD (write, not read), mask, arb, control
     *((volatile uint32_t *) (0x40040024)) |= 0xF0;
 
     //set 11 bit identifier (ARB) and direction
-    ID <<= 2;
-    *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
-    *((volatile uint32_t *) (0x40040034)) |= ID;
+    if ((ID&0xFFFFF800) != 0){set_ID_29(ID);} else {
+        ID <<= 2;
+        *((volatile uint32_t *) (0x40040034)) &= 0xFFFFE000;
+        *((volatile uint32_t *) (0x40040034)) |= ID;
+    }
 
-    //id masking
-    *((volatile uint32_t *) (0x4004002C)) = 0x00001FFC;
+
+    //all masking bits 'don't care' if no match used
+    *((volatile uint32_t *) (0x4004002C)) = 0x0;
+
+
+    //configure message control (set EOB and DLC(#4))
+    *((volatile uint32_t *) (0x40040038)) = 0x0;
+    *((volatile uint32_t *) (0x40040038)) |= 0x80;
+    *((volatile uint32_t *) (0x40040038)) |= DLC;
+
+    if (!MATCH){*((volatile uint32_t *) (0x40040038)) |= 0x1000;}
 
     //validate message object
     *((volatile uint32_t *) (0x40040034)) |= 0x8000;
 
-    //configure message control (set EOB and DLC(#4))
-    *((volatile uint32_t *) (0x40040038)) &= 0xFFFFFFF0;
-    *((volatile uint32_t *) (0x40040038)) |= 0x1080;
-    *((volatile uint32_t *) (0x40040038)) |= DLC;
-
     //write to MNUM to initiate transfer
     *((volatile uint32_t *) (0x40040020)) = MNUM;
 
+}
+
+/*
+ * sets 29 bit extended CAN ID in IF1
+ */
+void set_ID_29(uint32_t ID){
+    //set XTD
+    *((volatile uint32_t *) (0x40040034)) = 0x4000;
+
+    *((volatile uint32_t *) (0x40040030)) = ID&0xFFFF;
+    ID >>= 16;
+    *((volatile uint32_t *) (0x40040034)) |= ID;
 }
 
 /*
@@ -139,12 +178,12 @@ void CAN_read_init(uint16_t ID, uint8_t DLC, uint8_t MNUM){
  */
 uint32_t CAN_read(uint8_t MNUM){
     //indicate reading DATA A and DATA B from Message object
-    *((volatile uint32_t *) (0x40040084)) = 0x13;
+    *((volatile uint32_t *) (0x40040084)) = 0x33;
     //write MNUM to CRQ
-    *((volatile uint32_t *) (0x40040080)) = 0x2;
+    *((volatile uint32_t *) (0x40040080)) = MNUM;
 
-    //clear new dat to indicate successful read
-    *((volatile uint32_t *) (0x40040098)) &= 0x7FFF;
+    //clear new dat and msglost to indicate successful read
+    *((volatile uint32_t *) (0x40040098)) &= 0x3FFF;
 
     //change to write
     *((volatile uint32_t *) (0x40040084)) |= 0x80;
@@ -160,6 +199,8 @@ uint32_t CAN_read(uint8_t MNUM){
     dat |= *((volatile uint32_t*)(0x400400A0));
     dat <<= 16;
     dat |= *((volatile uint32_t*)(0x4004009C));
+
+
     return dat;
 }
 
@@ -256,15 +297,53 @@ void CAN_remote_send(uint8_t MNUM){
 /*
  * Hard coded for specific CAN bit timing
  * CAN module must be ready for configuration when this routine is called
+ *
+ * - Takes bit timing variables
+ * - Will decrement variables for register compatability
  */
-void CAN_SET_RATE(){
+void CAN_SET_RATE(uint8_t BRP, uint8_t SJW, uint8_t TSEG1, uint8_t TSEG2){
+    //CCE in ctl
+    *((volatile uint32_t *) (0x40040000)) |= 0x00000040;
+
     //set BRP to 1
-    *((volatile uint32_t *) (0x4004000C)) = 0x00000001;
+    *((volatile uint32_t *) (0x4004000C)) = BRP - 1;
     //set SJW to 3
-    *((volatile uint32_t *) (0x4004000C)) |= 0x000000C0;
+    *((volatile uint32_t *) (0x4004000C)) |= (SJW -1) << 6;
     //set TSEG1 to 12
-    *((volatile uint32_t *) (0x4004000C)) |= 0x00000C00;
+    *((volatile uint32_t *) (0x4004000C)) |= (TSEG1 - 1) << 8;
     //set TSEG2 to 2
-    *((volatile uint32_t *) (0x4004000C)) |= 0x00002000;
+    *((volatile uint32_t *) (0x4004000C)) |= (TSEG2 - 1) << 12;
 }
+
+/*
+ * Configure and enable CAN interrupts
+ */
+void CAN_interupts(){
+    *((volatile uint32_t *) (0xE000E104)) |= 0x80;
+
+
+    //enable status interrupts, and interrupts as a whole
+    *((volatile uint32_t *) (0x40040000)) |= 6;
+}
+
+
+/*
+ * Entered based on configuration of CAN interrupts
+ *
+ * - Only used if you use CAN_interrupts function
+ *
+ * Will probably trigger on the event of an error, or successful transmit/receive
+ */
+void CAN_interrupt_handler(){
+    //clears CAN interrupt by reading INT register
+    uint32_t INT = *((volatile uint32_t *) (0x40040010));
+    uint32_t STS = *((volatile uint32_t *) (0x40040004));
+    /*
+    if ((STS&8) != 0){
+        output_string("Successful transmit detected\n\r");
+    }
+    */
+    return;
+}
+
 
