@@ -1,6 +1,9 @@
 #include "OBD.h"
 #include "CAN.h"
 #include <stdint.h>
+#include "interrupt_handler.h"
+#include "lib_c.h"
+#include "codes.h"
 
 /*
  * Returns supported PIDS reported by vehicle
@@ -27,6 +30,65 @@ uint16_t OBD_GET_RPM(){
     //convert
 
     return RPM >>= 2;
+}
+
+
+
+//handler function to send RPM requests
+void RPM_REQUESTS(){
+    uint8_t dat[8] = {0x2,0x1,0x0C,0xCC,0xCC,0xCC,0xCC,0xCC};
+    CAN_send_data(dat, 0x2);
+}
+/*
+ * Requests RPM data
+ *
+ * Details:
+ *
+ * Initializes peripherals in order to service OBD communication for RPM data
+ *
+ * Starts timer with associated interrupt if not started already.
+ *
+ * Initializes CAN module, disabling auto-retransmit
+ *
+ * Intializes CAN message object for sending requests
+ *
+ * Initializes CAN message object for receiving responses
+ *
+ * (lots of initialization happens here; move to unified function later)
+ */
+void OBD_OPEN_RPM(){
+    init_uart();
+    uart_interrupt_init();
+    CAN_init(1);
+    CAN_SET_RATE(2,3,12,3);
+    CAN_read_init(ECU_0_RESPONSE_ID,0x8,0x1,1);
+    CAN_transmit_init(BROADCAST_REQUEST_ID,8 ,0x2 );
+    CAN_join_network();
+    Timer_Handler_Routine = RPM_REQUESTS;
+    if (!TIMER_INIT_STATUS){
+        timer_init();
+    }
+}
+
+/*
+ * Returns RPM data
+ *
+ * Details:
+ *
+ * This may only be called after associated OPEN call has been made
+ *
+ * The respective CAN message object is loaded into the interface registers,
+ * where the CAN drivers will return the state of the object
+ *
+ * If the interface register indicates that new data as been written since last clear; valid data is detected,
+ * and returned as decoded RPM data in rotations per minute
+ *
+ * If the interface register does not indicate that new data has been written since last clear, it assumed
+ * that something has gone awry with the corresponding request, and an error is returned indicating as such.
+ *
+ */
+void get_OBD_RPM(){
+
 }
 
 /*Initiates request for RPM data

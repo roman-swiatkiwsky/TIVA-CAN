@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include "lib_c.h"
 
+//simple variables which keep track of initialized peripherals
+int TIMER_INIT_STATUS;
+
 /*
  * This is just a quick example of initialization written in C instead of assembly
  *
@@ -123,6 +126,8 @@ uint32_t pos_to_int(uint32_t in){
     return pos;
 }
 
+
+//Initializes timer AND timer interrupt
 void timer_init(){
     //enable clock to timer 0
     *((volatile uint32_t *) (0x400FE604)) |= 0x1;
@@ -130,7 +135,7 @@ void timer_init(){
     //timer 0 periodic
     *((volatile uint32_t *) (0x40030004)) |= 0x2;
 
-    //setting timer interval
+    //setting timer interval (TIMER LENGTH HERE)
     *((volatile uint32_t *) (0x40030028)) = 0x00082355;
 
     //allow interrupts from timer
@@ -139,6 +144,8 @@ void timer_init(){
 
     //enable timer
     *((volatile uint32_t *) (0x4003000C)) |= 1;
+
+    TIMER_INIT_STATUS = 1;
 }
 
 void fpu_init(){

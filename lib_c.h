@@ -1,4 +1,7 @@
 #include <stdint.h>
+
+extern int TIMER_INIT_STATUS;
+
 void init_uart();
 uint8_t read_character();
 void output_character(uint8_t);

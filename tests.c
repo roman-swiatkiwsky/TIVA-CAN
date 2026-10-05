@@ -258,7 +258,6 @@ void TEST_OBD_RPM(){
     CAN_join_network();
     //timer_init();
 
-
     //poll for response
     while (1) {
         uint32_t result = CAN_check_message();
