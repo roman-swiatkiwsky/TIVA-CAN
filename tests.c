@@ -220,6 +220,11 @@ void TEST_dummy_ECU(){
 
 //requests RPM data on button press
 void TEST_OBD_RPM_handler(){
+    char c[10];
+    itoa(RPM,c );
+    output_string(c);
+    output_string("\n\r");
+
     uint8_t dat[8] = {0x2,0x1,0x0C,0xCC,0xCC,0xCC,0xCC,0xCC};
     CAN_send_data(dat, 0x2);
 }
@@ -238,22 +243,20 @@ void TEST_OBD_RPM_TIMER_handler(){
 
     uint8_t dat[8] = {0x2,0x1,0x0C,0xCC,0xCC,0xCC,0xCC,0xCC};
     CAN_send_data(dat, 0x2);
-
-
 }
 
 
 void TEST_OBD_RPM(){
     Handler_routine = TEST_OBD_RPM_handler;
-    Timer_Handler_Routine = TEST_OBD_RPM_TIMER_handler;
+    //Timer_Handler_Routine = TEST_OBD_RPM_TIMER_handler;
     init_uart();
     uart_interrupt_init();
     CAN_init(1);
     CAN_SET_RATE(2,3,12,3);
-    CAN_read_init(0x18DAF110,0x8,0x1,1);
-    CAN_transmit_init(0x18DB33F1,8 ,0x2 );
+    CAN_read_init(ECU_0_RESPONSE_ID,0x8,0x1,1);
+    CAN_transmit_init(BROADCAST_REQUEST_ID,8 ,0x2 );
     CAN_join_network();
-    timer_init();
+    //timer_init();
 
 
     //poll for response

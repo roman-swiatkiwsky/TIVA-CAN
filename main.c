@@ -9,7 +9,8 @@ int main(void)
 {
     //ENTER TEST ROUTINE
     while (1) {
-        TEST_OBD_RPM();
+    TEST_OBD_RPM();
+
     }
 
 }
