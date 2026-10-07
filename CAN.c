@@ -9,8 +9,6 @@ void set_ID_29(uint32_t ID);
  * -GPIO init for CAN pins
  * -Disable auto-retransmit (DAR)
  */
-
-
 void CAN_init(uint8_t DAR){
     //enable clock to CAN module 0
     *((volatile uint32_t *) (0x400FE634)) |= 1;
@@ -202,6 +200,43 @@ uint32_t CAN_read(uint8_t MNUM){
 
 
     return dat;
+}
+
+/*
+ * Places CAN data from interface register from data into buffer
+ *
+ * Details:
+ *
+ * The number of message object and a 8 byte buffer is provided for data transfer
+ *
+ * If new data is detected, fill buffer and return 0 indicating success
+ * If interface register indicates that no new data is present, return an error code
+ * - 1 indicates that no new data has been written since last read
+ *
+ *
+ */
+int CAN_READ_FULL(uint8_t MNUM, uint8_t buf[8]){
+    *((volatile uint32_t *) (0x40040084)) = 0x33;
+    //write MNUM to CRQ
+    *((volatile uint32_t *) (0x40040080)) = MNUM;
+    if (((*((volatile uint32_t *) (0x40040098)))&0x8000) == 0){
+        //return error if no new data
+        return 1;
+    }
+
+    //clear new dat and msglost to indicate successful read
+    *((volatile uint32_t *) (0x40040098)) &= 0x3FFF;
+    //change to write
+    *((volatile uint32_t *) (0x40040084)) |= 0x80;
+    //write MNUM to CRQ
+    *((volatile uint32_t *) (0x40040080)) = MNUM;
+
+    *((uint16_t*)(buf)) = *((volatile uint32_t *) (0x4004009C));
+    *((uint16_t*)(buf+2)) = *((volatile uint32_t *) (0x400400A0));
+    *((uint16_t*)(buf+4)) = *((volatile uint32_t *) (0x400400A4));
+    *((uint16_t*)(buf+6)) = *((volatile uint32_t *) (0x400400A8));
+
+    return 0;
 }
 
 /*

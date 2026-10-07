@@ -45,4 +45,5 @@ This constraint led me to develop test level defined interrupt functions. This w
 My test bench consists of the following hardware: two of the aforementioned controllers; two TJA1051T/3 CAN tranceivers; two 120 ohm equivilent resistors in parallel; and a bread board. 
 
 I utilize the power rails of the bread board as a common line in which the CAN high and low wires interface. 
+
 ![test text](./project_images/CAN_test_bench.jpg)

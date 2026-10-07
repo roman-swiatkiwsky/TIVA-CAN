@@ -87,8 +87,18 @@ void OBD_OPEN_RPM(){
  * that something has gone awry with the corresponding request, and an error is returned indicating as such.
  *
  */
-void get_OBD_RPM(){
+uint16_t get_OBD_RPM(){
+    uint8_t buf[8];
+    int ret = CAN_READ_FULL(1,buf );
+    if (ret){
+        //error if no new data
+        return -1;
+    }
+    uint16_t RPM = 0;
+    RPM |= (buf[3] << 8);
+    RPM |= (buf[4]);
 
+    return RPM >>= 2;
 }
 
 /*Initiates request for RPM data

@@ -220,11 +220,6 @@ void TEST_dummy_ECU(){
 
 //requests RPM data on button press
 void TEST_OBD_RPM_handler(){
-    char c[10];
-    itoa(RPM,c );
-    output_string(c);
-    output_string("\n\r");
-
     uint8_t dat[8] = {0x2,0x1,0x0C,0xCC,0xCC,0xCC,0xCC,0xCC};
     CAN_send_data(dat, 0x2);
 }
@@ -262,8 +257,13 @@ void TEST_OBD_RPM(){
     while (1) {
         uint32_t result = CAN_check_message();
         if (result != 0){
-            result = CAN_read(0x1);
-            RPM = OBD_GET_RPM();
+            //result = CAN_read(0x1);
+            //RPM = OBD_GET_RPM();
+            uint16_t rpm = get_OBD_RPM();
+            char c[10];
+            itoa(rpm,c );
+            output_string(c);
+            output_string("\n\r");
 
         }
     }
