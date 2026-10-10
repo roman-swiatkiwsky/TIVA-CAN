@@ -5,6 +5,35 @@
 #include "lib_c.h"
 #include "codes.h"
 
+
+/*
+ * Initializes MCU peripherals for OBD communication
+ *
+ * This function must be called before any other in this library
+ *
+ * Currently, this function sets CAN message objects such that message object #1 is for receiving ECU response,
+ * and #2 is for sending requests.
+ *
+ * Details:
+ *
+ * Initializes microcontroller peripherals which are required for successful communication with ECU
+ *
+ * Peripherals include:
+ * -CAN for sending data between ECUs
+ * -Timers for making requests on an interval
+ * -UART for sending information to display
+ *
+ */
+void OBD_START(){
+    init_uart();
+    uart_interrupt_init();
+    CAN_init(1);
+    CAN_SET_RATE(2,3,12,3);
+    CAN_read_init(ECU_0_RESPONSE_ID,0x8,0x1,1);
+    CAN_transmit_init(BROADCAST_REQUEST_ID,8 ,0x2 );
+    CAN_join_network();
+}
+
 /*
  * Returns supported PIDS reported by vehicle
  *
@@ -44,26 +73,10 @@ void RPM_REQUESTS(){
  *
  * Details:
  *
- * Initializes peripherals in order to service OBD communication for RPM data
+ *Changes timer handler function to one that sends out OBD requests for current RPM data
  *
- * Starts timer with associated interrupt if not started already.
- *
- * Initializes CAN module, disabling auto-retransmit
- *
- * Intializes CAN message object for sending requests
- *
- * Initializes CAN message object for receiving responses
- *
- * (lots of initialization happens here; move to unified function later)
  */
 void OBD_OPEN_RPM(){
-    init_uart();
-    uart_interrupt_init();
-    CAN_init(1);
-    CAN_SET_RATE(2,3,12,3);
-    CAN_read_init(ECU_0_RESPONSE_ID,0x8,0x1,1);
-    CAN_transmit_init(BROADCAST_REQUEST_ID,8 ,0x2 );
-    CAN_join_network();
     Timer_Handler_Routine = RPM_REQUESTS;
     if (!TIMER_INIT_STATUS){
         timer_init();
@@ -87,14 +100,14 @@ void OBD_OPEN_RPM(){
  * that something has gone awry with the corresponding request, and an error is returned indicating as such.
  *
  */
-uint16_t get_OBD_RPM(){
+int16_t get_OBD_RPM(){
     uint8_t buf[8];
     int ret = CAN_READ_FULL(1,buf );
     if (ret){
         //error if no new data
         return -1;
     }
-    uint16_t RPM = 0;
+    int16_t RPM = 0;
     RPM |= (buf[3] << 8);
     RPM |= (buf[4]);
 

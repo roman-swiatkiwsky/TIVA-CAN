@@ -242,29 +242,16 @@ void TEST_OBD_RPM_TIMER_handler(){
 
 
 void TEST_OBD_RPM(){
-    Handler_routine = TEST_OBD_RPM_handler;
-    //Timer_Handler_Routine = TEST_OBD_RPM_TIMER_handler;
-    init_uart();
-    uart_interrupt_init();
-    CAN_init(1);
-    CAN_SET_RATE(2,3,12,3);
-    CAN_read_init(ECU_0_RESPONSE_ID,0x8,0x1,1);
-    CAN_transmit_init(BROADCAST_REQUEST_ID,8 ,0x2 );
-    CAN_join_network();
-    //timer_init();
-
+    OBD_START();
+    OBD_OPEN_RPM();
     //poll for response
     while (1) {
-        uint32_t result = CAN_check_message();
-        if (result != 0){
-            //result = CAN_read(0x1);
-            //RPM = OBD_GET_RPM();
-            uint16_t rpm = get_OBD_RPM();
+        int16_t ret = get_OBD_RPM();
+        if (ret != -1){
             char c[10];
-            itoa(rpm,c );
+            itoa(ret,c );
             output_string(c);
-            output_string("\n\r");
-
+            output_string("\r");
         }
     }
 }
@@ -280,13 +267,21 @@ void TEST_OBD_RPM_ECU(){
     CAN_transmit_init(0x18DAF110,0x8,0x1);
     CAN_join_network();
 
+    uint32_t rpm = 0x21DC;
     //poll for response
     while (1) {
         uint32_t result = CAN_check_message();
+
         if (result != 0){
+
+            uint8_t a = (rpm&0xFF00)>>8;
+            uint8_t b = (rpm&0xFF);
+
             result = CAN_read(2);
-            uint8_t dat[8] = {0x4,0x41,0x0C,0x21,0xDC,0xCC,0xCC,0xCC};
+            uint8_t dat[8] = {0x4,0x41,0x0C,a,b,0xCC,0xCC,0xCC};
             CAN_send_data(dat, 1);
+            rpm++;
+
         }
     }
 }
