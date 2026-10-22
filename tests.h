@@ -11,3 +11,4 @@ void TEST_dummy_ECU();
 void TEST_OBD_RPM();
 void TEST_itoa();
 void TEST_OBD_RPM_ECU();
+void TEST_OBD_THROTTLE_POS();

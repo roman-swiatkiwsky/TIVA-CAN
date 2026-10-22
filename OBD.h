@@ -5,3 +5,5 @@ uint32_t OBD_Get_Supported_PIDS(uint32_t REQUEST_ID);
 uint16_t OBD_GET_RPM();
 int16_t get_OBD_RPM();
 void OBD_OPEN_RPM();
+void OBD_OPEN_THROTTLE_POS();
+int16_t get_OBD_THROTTLE_POS();

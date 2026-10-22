@@ -83,6 +83,26 @@ void OBD_OPEN_RPM(){
     }
 }
 
+void THROTTLE_REQUESTS(){
+    uint8_t dat[8] = {0x2,0x1,0x11,0xCC,0xCC,0xCC,0xCC,0xCC};
+    CAN_send_data(dat, 0x2);
+}
+
+/*
+ * Requests throttle position data
+ *
+ * Details:
+ *
+ *Changes timer handler function to one that sends out OBD requests for current throttle position data
+ *
+ */
+void OBD_OPEN_THROTTLE_POS(){
+    Timer_Handler_Routine = THROTTLE_REQUESTS;
+    if (!TIMER_INIT_STATUS){
+        timer_init();
+    }
+}
+
 /*
  * Returns RPM data
  *
@@ -112,6 +132,25 @@ int16_t get_OBD_RPM(){
     RPM |= (buf[4]);
 
     return RPM >>= 2;
+}
+
+int16_t get_OBD_THROTTLE_POS(){
+    uint8_t buf[8];
+    int ret = CAN_READ_FULL(1,buf );
+    if (ret){
+        //error if no new data
+        return -1;
+    }
+
+    float x = buf[3];
+    //this should hold throttle percentage in 32 bit floating point representation.
+    x = x/2.55;
+
+    //convert to int for now
+    int k = x;
+
+
+    return k;
 }
 
 /*Initiates request for RPM data

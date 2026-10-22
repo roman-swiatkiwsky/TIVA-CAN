@@ -286,6 +286,22 @@ void TEST_OBD_RPM_ECU(){
     }
 }
 
+void TEST_OBD_THROTTLE_POS(){
+    OBD_START();
+    OBD_OPEN_THROTTLE_POS();
+    //poll for response
+    while (1) {
+        int16_t ret = get_OBD_THROTTLE_POS();
+        if (ret != -1){
+            char c[10];
+            itoa(ret,c );
+            output_string(c);
+            output_string("\r");
+        }
+    }
+}
+
+
 void TEST_itoa(){
     init_uart();
     int t = 934;
@@ -293,6 +309,8 @@ void TEST_itoa(){
     itoa(t,c );
     output_string(c);
 }
+
+
 
 
 
