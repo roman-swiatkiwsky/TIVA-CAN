@@ -46,10 +46,16 @@ My test bench consists of the following hardware: two of the aforementioned cont
 
 I utilize the power rails of the bread board as a common line in which the CAN high and low wires interface. 
 
-![test text](./project_images/CAN_test_bench.jpg)
+![](./project_images/CAN_test_bench.jpg)
 
 ## Field Testing 
 
 The CAN High/Low lines of a CAN bus on a real vehicle are exposed through the Data Link Connector (DLC) diagnostic port. In order to interface with this, I purchased the respective connector which can be seen in the image below. The CAN High/Low lines of the connector are fed to the transceiver; which in turn interfaces with the MCU. 
 
 ![](./project_images/DLC_CONNECT.jpg)
+
+The complete setup for field testing involves plugging in the DLC adapter into the vehicle, with the tranceiver connected to the adapter and the MCU respectively. Finally, my laptop is used to display data requested from the vehicle by the MCU via a serial connection to my terminal. An example setup can be seen below. 
+
+![](./project_images/FIELD_TEST.jpg)
+
+
